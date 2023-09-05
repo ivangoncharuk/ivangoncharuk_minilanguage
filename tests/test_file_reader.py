@@ -2,22 +2,23 @@ import unittest
 
 from src.file_reader import FileReader
 
-class TestFileReader(unittest.TestCase):
+input_file = "test_input_file.txt"
 
+class TestFileReader(unittest.TestCase):
     def test_nextChar(self):
-        fr = FileReader("some_input_file.txt")
+        fr = FileReader(input_file)
         fr.nextChar()
         # testing that currentChar is the first char of the file
-        self.assertEqual(fr.currentChar(), "Expected first character")
+        self.assertEqual(fr.currentChar(), 'H')
 
     def test_currentChar(self):
 
-        fr = FileReader("some_input_file.txt")
+        fr = FileReader(input_file)
         fr.nextChar()
-        self.assertEqual(fr.currentChar(), "Expected first character")
+        self.assertEqual(fr.currentChar(), 'H')
 
     def test_position(self):
-        fr = FileReader("some_input_file.txt")
+        fr = FileReader(input_file)
         fr.nextChar()
         # Test position
         self.assertEqual(fr.position(), "1:1")

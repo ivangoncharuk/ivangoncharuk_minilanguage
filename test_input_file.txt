@@ -1,0 +1,8 @@
+Hello there!
+
+This is a text file I am writing to test my application.
+
+If you are reading this, I hope you have a great day!
+
+- Ivan Goncharuk
+

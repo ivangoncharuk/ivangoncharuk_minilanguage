@@ -1,21 +1,22 @@
 from file_reader import FileReader
 
-if __name__ == "__main__":
-    reader = FileReader()
+def main():
     while True:
-        # prompting user for a file name
-        file_name = input("Please enter the file name or type 'quit' or 'exit' to exit: ")
+        filename = input("Enter the filename (or 'quit' to exit): ")
         
-        if file_name.lower() in ['quit', 'exit']: 
-            print("Quitting...")
+        if filename.lower() in ["quit", "exit"]:
             break
 
-        #todo validate and read the file into reader.file_buffer here
+        try:
+            fr = FileReader(filename)
+        except FileNotFoundError:
+            print("File not found. Please try again.")
+            continue
 
-        # initialize with the nextChar call
-        reader.nextChar()
+        fr.nextChar()
+        while fr.currentChar() != "ETX":
+            print(fr.position() + " " + fr.currentChar())
+            fr.nextChar()
 
-        # main loop 
-        while reader.currentChar() != "ETX":
-            print(reader.position() + " " + reader.currentChar())
-            reader.nextChar()
+if __name__ == "__main__":
+    main()
