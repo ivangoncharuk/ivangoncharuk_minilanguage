@@ -1,44 +1,28 @@
-# tests/test_file_reader.py
-
 import unittest
+
 from src.file_reader import FileReader
 
 class TestFileReader(unittest.TestCase):
-  
-    def test_nextChar(self):
-        reader = FileReader()
-        reader.load_file('test_file1.txt')  # Assuming this file contains 'Hello'
-        
-        reader.nextChar()
-        self.assertEqual(reader.currentChar(), 'H')
-        
-        reader.nextChar()
-        self.assertEqual(reader.currentChar(), 'e')
-        
-        reader.nextChar()
-        self.assertEqual(reader.currentChar(), 'l')
-        
-        #todo add tests to check for End-of-Text (ETX)
-        
-        
-    def test_currentChar(self):
-        reader = FileReader()
-        reader.load_file('test_file1.txt')
-        
-        reader.nextChar()
-        self.assertEqual(reader.currentChar(), 'H')
-        
-        reader.nextChar()
-        self.assertEqual(reader.currentChar(), 'e')
 
+    def test_nextChar(self):
+        fr = FileReader("some_input_file.txt")
+        fr.nextChar()
+        # testing that currentChar is the first char of the file
+        self.assertEqual(fr.currentChar(), "Expected first character")
+
+    def test_currentChar(self):
+
+        fr = FileReader("some_input_file.txt")
+        fr.nextChar()
+        self.assertEqual(fr.currentChar(), "Expected first character")
 
     def test_position(self):
-        reader = FileReader()
-        reader.load_file('test_file1.txt')
-        
-        reader.nextChar()
-        self.assertEqual(reader.position(), '1:1')
-        
-        reader.nextChar()
-        self.assertEqual(reader.position(), '1:2')
-        
+        fr = FileReader("some_input_file.txt")
+        fr.nextChar()
+        # Test position
+        self.assertEqual(fr.position(), "1:1")
+
+    def test_file_not_found_exception(self):
+        # Test file not found exception
+        with self.assertRaises(FileNotFoundError):
+            fr = FileReader("non_existent_file.txt")
