@@ -11,12 +11,6 @@ class TestFileReader(unittest.TestCase):
         # testing that currentChar is the first char of the file
         self.assertEqual(fr.currentChar(), 'H')
 
-    def test_currentChar(self):
-
-        fr = FileReader(input_file)
-        fr.nextChar()
-        self.assertEqual(fr.currentChar(), 'H')
-
     def test_position(self):
         fr = FileReader(input_file)
         fr.nextChar()
