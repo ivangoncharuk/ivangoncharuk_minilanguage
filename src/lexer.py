@@ -61,39 +61,47 @@ class Lexer:
     def position(self):
         return self.current_token.position if self.current_token else None
 
-    def next_token(self):
+    def skip_whitespace(self):
         while self.current_char and self.current_char.isspace():
             self.next_char()
+
+    def read_identifier_or_keyword(self):
+        start_index = self.index
+        while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
+            self.next_char()
+        identifier = self.input_text[start_index:self.index]
+        if identifier in self.keywords:
+            return Token(identifier, position=(self.line_number, self.char_number - len(identifier)))
+        return Token("ID", value=identifier, position=(self.line_number, self.char_number - len(identifier)))
+
+    def read_number(self):
+        start_index = self.index
+        while self.current_char and self.current_char.isdigit():
+            self.next_char()
+        number = self.input_text[start_index:self.index]
+        return Token("NUM", value=int(number), position=(self.line_number, self.char_number - len(number)))
+
+    def read_symbol(self):
+        if self.current_char == ":" and self.peek_char() == "=":
+            self.next_char()
+            self.next_char()
+            return Token(":=", position=(self.line_number, self.char_number - 1))
+        char = self.current_char
+        self.next_char()
+        return Token(char, position=(self.line_number, self.char_number - 1))
+
+    def next_token(self):
+        self.skip_whitespace()
 
         if not self.current_char:
             self.current_token = Token("end-of-text", position=(self.line_number, self.char_number))
             return
 
-        token_position = (self.line_number, self.char_number)
-
         if self.current_char.isalpha() or self.current_char == "_":
-            start_index = self.index
-            while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
-                self.next_char()
-            identifier = self.input_text[start_index:self.index]
-            if identifier in self.keywords:
-                self.current_token = Token(identifier, position=token_position)
-            else:
-                self.current_token = Token("ID", value=identifier, position=token_position)
+            self.current_token = self.read_identifier_or_keyword()
 
         elif self.current_char.isdigit():
-            start_index = self.index
-            while self.current_char and self.current_char.isdigit():
-                self.next_char()
-            number = self.input_text[start_index:self.index]
-            self.current_token = Token("NUM", value=int(number), position=token_position)
-
-        elif self.current_char == ":" and self.peek_char() == "=":
-            self.next_char()
-            self.next_char()
-            self.current_token = Token(":=", position=token_position)
+            self.current_token = self.read_number()
 
         else:
-            char = self.current_char
-            self.next_char()
-            self.current_token = Token(char, position=token_position)
+            self.current_token = self.read_symbol()
