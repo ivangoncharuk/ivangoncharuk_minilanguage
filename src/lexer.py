@@ -90,7 +90,18 @@ class Lexer:
         self.next_char()
         return Token(char, position=(self.line_number, self.char_number - 1))
 
+    def skip_comment(self):
+        while self.current_char and self.current_char != "\n":
+            self.next_char()
+        self.next_char()
+
     def next_token(self):
+        while self.current_char and (self.current_char.isspace() or (self.current_char == '/' and self.peek_char() == '/')):
+            if self.current_char == '/' and self.peek_char() == '/':
+                self.skip_comment()
+            else:
+                self.next_char()
+
         self.skip_whitespace()
 
         if not self.current_char:
