@@ -24,7 +24,7 @@ class Token:
         return f"{position_str} {self.kind}{value_str}"
 
 class Lexer:
-    keywords = {"if", "then", "else", "end", "while", "do", "print"}
+    
     def __init__(self, input_text):
         self.input_text = input_text
         self.current_char = self.input_text[0] if self.input_text else None
@@ -32,6 +32,7 @@ class Lexer:
         self.char_number = 1
         self.index = 0
         self.current_token = None
+        self.keywords = {'program', 'if', 'then', 'end', 'do', 'while', 'print'}
 
     def next_char(self):
         if self.current_char == "\n":
