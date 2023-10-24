@@ -32,7 +32,7 @@ class Lexer:
         self.char_number = 1
         self.index = 0
         self.current_token = None
-        self.keywords = {'program', 'if', 'then', 'end', 'do', 'while', 'print', 'else'}
+        self.keywords = {'program', 'if', 'then', 'end', 'do', 'while', 'print', 'else', 'int', 'bool'}
 
     def next_char(self):
         if self.current_char == "\n":
