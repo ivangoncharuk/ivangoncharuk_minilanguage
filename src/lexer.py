@@ -93,11 +93,20 @@ class Lexer:
         self.next_char()
         return Token(current_char, position=(self.line_number, self.char_number - 1))
 
-    
     def skip_comment(self):
         while self.current_char and self.current_char != "\n":
             self.next_char()
         self.next_char()
+
+    def read_string_literal(self):
+        start_index = self.index
+        self.next_char()  # skip the opening double quote
+        while self.current_char and self.current_char != "\"":
+            self.next_char()
+        self.next_char()  # skip the closing double quote
+        string_literal = self.input_text[start_index:self.index]
+        return Token("STRING", value=string_literal, position=(self.line_number, self.char_number - len(string_literal)))
+
 
     def next_token(self):
         while self.current_char and (self.current_char.isspace() or (self.current_char == '/' and self.peek_char() == '/')):
@@ -111,12 +120,11 @@ class Lexer:
         if not self.current_char:
             self.current_token = Token("end-of-text", position=(self.line_number, self.char_number))
             return
-
-        if self.current_char.isalpha() or self.current_char == "_":
+        if self.current_char == "\"":
+            self.current_token = self.read_string_literal()
+        elif self.current_char.isalpha() or self.current_char == "_":
             self.current_token = self.read_identifier_or_keyword()
-
         elif self.current_char.isdigit():
             self.current_token = self.read_number()
-
         else:
             self.current_token = self.read_symbol()

@@ -4,7 +4,7 @@ test_input_1 = "var1 := 123; x := 456; y := 789"
 test_input_2 = "if x < 10 then y := x + 1 end"
 test_input_3 = "// This is a comment\nx := 5 // Another comment"
 
-program_example_1 =  """program example1:
+program_example_1 = """program example1:
   x := 10;
   y := 20;
   print x + y."""
@@ -70,6 +70,8 @@ comprehensive_test = """program comprehensive_test:
   end
   while x != 0 do
     x := x - 1;
+    if x <= 1 then
+      print "x is less than 1"
     if flag then
       print "x is not zero";
     else
@@ -80,10 +82,16 @@ comprehensive_test = """program comprehensive_test:
 end.
 """
 
-lexer = Lexer(program_example_4_comments)
-print("\n" + program_example_4_comments + "\n")
+lexer = Lexer(comprehensive_test)
+print("\n" + comprehensive_test + "\n")
 lexer.next_token()
-print(lexer.position(), lexer.kind(), lexer.value() if lexer.value() is not None else "")
-while lexer.kind() != 'end-of-text':
+print(
+    lexer.position(), lexer.kind(), lexer.value() if lexer.value() is not None else ""
+)
+while lexer.kind() != "end-of-text":
     lexer.next_token()
-    print(lexer.position(), lexer.kind(), lexer.value() if lexer.value() is not None else "")
+    print(
+        lexer.position(),
+        lexer.kind(),
+        lexer.value() if lexer.value() is not None else "",
+    )
