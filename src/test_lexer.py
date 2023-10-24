@@ -56,6 +56,30 @@ end"""
 
 non_sense = "Program lexically-ok-2"
 
+comprehensive_test = """program comprehensive_test:
+  int x, y, z;
+  bool flag;
+  x := 10;
+  y := 20;
+  z := 30;
+  flag := true;
+  if x < y then
+    print x + y * z;
+  else
+    print y - z;
+  end
+  while x != 0 do
+    x := x - 1;
+    if flag then
+      print "x is not zero";
+    else
+      print "x is zero";
+    end
+  end
+  print "Final value of x: ", x;
+end.
+"""
+
 lexer = Lexer(program_example_4_comments)
 print("\n" + program_example_4_comments + "\n")
 lexer.next_token()

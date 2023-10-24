@@ -83,14 +83,17 @@ class Lexer:
         return Token("NUM", value=int(number), position=(self.line_number, self.char_number - len(number)))
 
     def read_symbol(self):
-        if self.current_char == ":" and self.peek_char() == "=":
+        two_char_operators = {":=", "!=", "=<", ">="}
+        current_char = self.current_char
+        next_char = self.peek_char()
+        if current_char + next_char in two_char_operators:
             self.next_char()
             self.next_char()
-            return Token(":=", position=(self.line_number, self.char_number - 1))
-        char = self.current_char
+            return Token(current_char + next_char, position=(self.line_number, self.char_number - 1))
         self.next_char()
-        return Token(char, position=(self.line_number, self.char_number - 1))
+        return Token(current_char, position=(self.line_number, self.char_number - 1))
 
+    
     def skip_comment(self):
         while self.current_char and self.current_char != "\n":
             self.next_char()
