@@ -20,8 +20,44 @@ program_example_3 = """program example3:
     x := x - 1;
   end."""
 
-lexer = Lexer(program_example_3)
-print("\n" + program_example_3 + "\n")
+program_example_4 = """program control_flow:
+  int x;
+  if x > 0 then
+    while x != 0 do
+      x := x - 1
+    end
+  else
+    x := 10
+  end.
+"""
+
+program_example_4_comments = """program control_flow:
+  int x; // initialize x
+  if x > 0 then // if statement
+    while x != 0 do // while statement
+      x := x - 1 //assigning x to the expression
+    end //ending the while loop
+  else
+    x := 10
+  end.
+"""
+
+program_tricky = """program bad_expression:
+   int a;
+   int b;
+   if4 a < b then5
+     2int b;
+     b := 2 * a
+   5else
+     bool b;
+     b := 2 * a
+   fii
+end"""
+
+non_sense = "Program lexically-ok-2"
+
+lexer = Lexer(program_example_4_comments)
+print("\n" + program_example_4_comments + "\n")
 lexer.next_token()
 print(lexer.position(), lexer.kind(), lexer.value() if lexer.value() is not None else "")
 while lexer.kind() != 'end-of-text':
