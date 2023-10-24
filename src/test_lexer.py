@@ -6,4 +6,3 @@ token = lexer.next_token()
 while token and token.kind != "end-of-text":
     print(token)
     token = lexer.next_token()
-

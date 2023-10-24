@@ -33,13 +33,15 @@ class Lexer:
         self.index = 0
 
     def next_char(self):
+        if self.current_char == "\n":
+            self.line_number += 1
+            self.char_number = 1
+        else:
+            self.char_number += 1
+
         self.index += 1
         if self.index < len(self.input_text):
             self.current_char = self.input_text[self.index]
-            self.char_number += 1
-            if self.current_char == "\n":
-                self.line_number += 1
-                self.char_number = 0
         else:
             self.current_char = None
 
@@ -74,6 +76,7 @@ class Lexer:
 
         else:
             if self.current_char == ":" and self.peek_char() == "=":
+                token_position = (self.line_number, self.char_number)
                 self.next_char()
                 self.next_char()
                 return Token(":=", position=token_position)
