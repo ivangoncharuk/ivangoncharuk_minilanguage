@@ -11,39 +11,31 @@ class Token:
 
 
 class Lexer:
-    
-    def __init__(self, input_text):
+    def __init__(self, input_text: str):
         self.input_text = input_text
         self.current_char = self.input_text[0] if self.input_text else None
         self.line_number = 1
         self.char_number = 1
         self.index = 0
         self.current_token = None
-        self.keywords = {'program', 'if', 'then',
-                         'end', 'do', 'while',
-                         'print', 'else', 'int',
-                         'bool', "and", "or", "not"}
+        self.keywords = {'program', 'if', 'then', 'end', 'do', 'while',
+                         'print', 'else', 'int', 'bool', "and", "or", "not"}
 
     def next_char(self):
-        if self.current_char == "\n":
-            self.line_number += 1
-            self.char_number = 0
-        elif self.current_char == "\t":
-            self.char_number += 4  # Assuming a tab is 4 spaces
-        else:
-            self.char_number += 1
+        """Move to the next character in the input text."""
+        if self.current_char:
+            if self.current_char == "\n":
+                self.line_number += 1
+                self.char_number = 1
+            else:
+                self.char_number += 4 if self.current_char == "\t" else 1
+            self.index += 1
+            self.current_char = self.input_text[self.index] if self.index < len(self.input_text) else None
 
-        self.index += 1
-        if self.index < len(self.input_text):
-            self.current_char = self.input_text[self.index]
-        else:
-            self.current_char = None
-
-    def peek_char(self):
+    def peek_char(self) -> str:
+        """Look at the next character in the input text without moving the current position."""
         peek_index = self.index + 1
-        if peek_index < len(self.input_text):
-            return self.input_text[peek_index]
-        return None
+        return self.input_text[peek_index] if peek_index < len(self.input_text) else None
 
     def kind(self):
         return self.current_token.kind if self.current_token else None
