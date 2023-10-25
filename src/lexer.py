@@ -9,6 +9,7 @@ class Token:
         value = f": {self.value}" if self.value is not None else ""
         return f"{position} {self.kind}{value}"
 
+
 class Lexer:
     def __init__(self, input_text: str):
         self.input_text = input_text
@@ -97,39 +98,6 @@ class Lexer:
             self.next_char()
         self.next_char()  # Skip the newline character at the end of the comment
 
-    def next_token(self):
-        """
-        Get the next token from the input text.
-        """
-        # Skip whitespaces and comments
-        while self.current_char and (self.current_char.isspace() or self.current_char == '/' and self.peek_char() == '/'):
-            if self.current_char == '/':
-                self.skip_comment()
-            else:
-                self.next_char()
-                
-        # Handle end of text
-        if not self.current_char:
-            position = (self.line_number, self.char_number)
-            self.current_token = Token("end-of-text", position=position)
-            return
-
-        # Handle illegal characters
-        illegal_characters = ["!", "@", "^"]
-        if self.current_char in illegal_characters:
-            error_msg = f"Unexpected symbol '{self.current_char}' at position ({self.line_number}, {self.char_number})"
-            raise SyntaxError(error_msg)
-            
-        # Generate and set the next token
-        if self.current_char == "\"":
-            self.current_token = self.read_string_literal()
-        elif self.current_char.isalpha() or self.current_char == "_":
-            self.current_token = self.read_identifier_or_keyword()
-        elif self.current_char.isdigit():
-            self.current_token = self.read_number()
-        else:
-            self.current_token = self.read_symbol()
-    
     def read_string_literal(self):
         """
         Read a string literal from the input text.
@@ -151,3 +119,59 @@ class Lexer:
         self.next_char()  # skip the closing quotation mark
         value = self.input_text[start_index:self.index]
         return Token("STRING", value=value, position=(start_line, start_char))
+    
+    def skip_whitespace_and_comments(self):
+        """
+        Skip whitespaces and single-line comments in the input text.
+        """
+        while self.current_char and (self.current_char.isspace() or (self.current_char == '/' and self.peek_char() == '/')):
+            if self.current_char == '/' and self.peek_char() == '/':
+                self.skip_comment()
+            else:
+                self.next_char()
+
+    def set_end_of_text_token(self):
+        """
+        Set the 'end-of-text' token if the end of the input text is reached.
+        """
+        if not self.current_char:
+            position = (self.line_number, self.char_number)
+            self.current_token = Token("end-of-text", position=position)
+            return True
+        return False
+
+    def check_for_illegal_characters(self):
+        """
+        Check for any illegal characters in the input text and raise a SyntaxError if found.
+        """
+        illegal_characters = ["!", "@", "^"]
+        if self.current_char in illegal_characters:
+            error_msg = f"Unexpected symbol '{self.current_char}' at position ({self.line_number}, {self.char_number})"
+            raise SyntaxError(error_msg)
+
+    def generate_token_based_on_current_char(self):
+        """
+        Generate the next token based on the current character in the input text.
+        """
+        if self.current_char == "\"":
+            self.current_token = self.read_string_literal()
+        elif self.current_char.isalpha() or self.current_char == "_":
+            self.current_token = self.read_identifier_or_keyword()
+        elif self.current_char.isdigit():
+            self.current_token = self.read_number()
+        else:
+            next_chars = self.input_text[self.index:self.index+3]
+            if next_chars == '***':
+                error_msg = f"Illegal token '***' at position ({self.line_number}, {self.char_number})"
+                raise SyntaxError(error_msg)
+            self.current_token = self.read_symbol()
+
+    def next_token(self):
+        """
+        Get the next token from the input text.
+        """
+        self.skip_whitespace_and_comments()
+        if self.set_end_of_text_token():
+            return
+        self.check_for_illegal_characters()
+        self.generate_token_based_on_current_char()
