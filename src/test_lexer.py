@@ -128,8 +128,65 @@ comprehensive_test_2 = """program comprehensive_test_2:
 end.
 """
 
-lexer = Lexer(comprehensive_test_2)
-print("\n" + comprehensive_test_2 + "\n")
+comprehensive_test_3 = """program comprehensive_test_3:
+  // Variable Declarations
+  int x, y, result;
+  bool flag, condition;
+  
+  // Assignment and Arithmetic Operations
+  x := 10;
+  y := 20;
+  result := x + y;
+  
+  // Conditional Statement with Relational Operators
+  if x >= y or y > x then
+    print "x is either greater than or equal to y, or y is greater than x";
+  else
+    print "Neither condition is true";
+  end
+  
+  // Iterative Statement with Comparison and Boolean Operators
+  while not flag and result != 0 do
+    result := result - 1;
+    if result <= 10 then
+      flag := true;
+    end
+  end
+  
+  // Print Statement with Expressions and String Concatenation
+  print "Final value of result: ", result, ", flag: ", flag;
+  
+  // Test String with Special Characters and Escaped Characters
+  print "Special Characters: !@#$%^&*()\nNew line and Tab:\t";
+  
+  // Test Boolean Operations
+  condition := true or false;
+  print "Condition: ", condition;
+  
+  // Test Unary Operator
+  print "Negative result: ", -result;
+end.
+"""
+
+lexically_not_okay = """
+  program lexically_not_Ok :
+    intt a;
+    int b;
+    a :== 2;
+    b := 5;
+    while (ab) do not print else do
+      int b;
+      b := 2 *** a;
+      print b^2;
+      a := a $ 1
+    end %;
+    print b~
+  end
+"""
+
+current_test = lexically_not_okay
+lexer = Lexer(current_test)
+print("\n" + current_test + "\n")
 lexer.next_token()
 print(
     lexer.position(), lexer.kind(), lexer.value() if lexer.value() is not None else ""
