@@ -1,27 +1,14 @@
 class Token:
-    def __init__(self, kind, value=None, position=None):
-        """
-        Initializes a new instance of the Token class.
-
-        :param kind: The kind of the token (e.g., ID, NUM, keyword, symbol, end-of-text)
-        :param value: The value of the token (if applicable)
-        :param position: The position of the token in the input (line number, character number)
-        """
+    def __init__(self, kind: str, value=None, position=None):
         self.kind = kind
         self.value = value
         self.position = position
 
     def __str__(self):
-        """
-        Returns a string representation of the token.
-        """
-        position_str = (
-            f"({self.position[0]}:{self.position[1]})"
-            if self.position
-            else "(Unknown Position)"
-        )
-        value_str = f": {self.value}" if self.value is not None else ""
-        return f"{position_str} {self.kind}{value_str}"
+        position = f"({self.position[0]}:{self.position[1]})" if self.position else "(Unknown Position)"
+        value = f": {self.value}" if self.value is not None else ""
+        return f"{position} {self.kind}{value}"
+
 
 class Lexer:
     
