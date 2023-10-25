@@ -56,7 +56,7 @@ end"""
 
 non_sense = "Program lexically-ok-2"
 
-comprehensive_test = """program comprehensive_test:
+comprehensive_test_1 = """program comprehensive_test:
   int x, y, z;
   bool flag;
   x := 10;
@@ -82,8 +82,54 @@ comprehensive_test = """program comprehensive_test:
 end.
 """
 
-lexer = Lexer(comprehensive_test)
-print("\n" + comprehensive_test + "\n")
+comprehensive_test_2 = """program comprehensive_test_2:
+  // Variable Declarations
+  int a, b, c;
+  bool flag;
+  
+  // Assignment Statements
+  a := 10;
+  b := 20;
+  c := 30;
+  flag := true;
+  
+  // Conditional Statement with Relational Operators
+  if a < b and b >= c then
+    print "a is less than b and b is greater or equal to c";
+  else
+    print "Condition is false";
+  end
+  
+  // Iterative Statement with Not Equal Operator
+  while a != 0 do
+    a := a - 1;
+    if a <= 1 then
+      print "a is less or equal to 1";
+    end
+    
+    if not flag then
+      print "Flag is false";
+    else
+      print "Flag is true";
+    end
+  end
+  
+  // Print Statement with Expression
+  print "Final value of a: ", a, ", b: ", b, ", c: ", c;
+  
+  // Test String with Special Characters
+  print "Special Characters: !@#$%^&*()";
+  
+  // Test Empty String
+  print "";
+  
+  // Test String with Escaped Characters
+  print "New line:\nTab:\t";
+end.
+"""
+
+lexer = Lexer(comprehensive_test_2)
+print("\n" + comprehensive_test_2 + "\n")
 lexer.next_token()
 print(
     lexer.position(), lexer.kind(), lexer.value() if lexer.value() is not None else ""

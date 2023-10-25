@@ -32,12 +32,17 @@ class Lexer:
         self.char_number = 1
         self.index = 0
         self.current_token = None
-        self.keywords = {'program', 'if', 'then', 'end', 'do', 'while', 'print', 'else', 'int', 'bool'}
+        self.keywords = {'program', 'if', 'then',
+                         'end', 'do', 'while',
+                         'print', 'else', 'int',
+                         'bool', "and", "or", "not"}
 
     def next_char(self):
         if self.current_char == "\n":
             self.line_number += 1
-            self.char_number = 1
+            self.char_number = 0
+        elif self.current_char == "\t":
+            self.char_number += 4  # Assuming a tab is 4 spaces
         else:
             self.char_number += 1
 
@@ -98,16 +103,6 @@ class Lexer:
             self.next_char()
         self.next_char()
 
-    def read_string_literal(self):
-        start_index = self.index
-        self.next_char()  # skip the opening double quote
-        while self.current_char and self.current_char != "\"":
-            self.next_char()
-        self.next_char()  # skip the closing double quote
-        string_literal = self.input_text[start_index:self.index]
-        return Token("STRING", value=string_literal, position=(self.line_number, self.char_number - len(string_literal)))
-
-
     def next_token(self):
         while self.current_char and (self.current_char.isspace() or (self.current_char == '/' and self.peek_char() == '/')):
             if self.current_char == '/' and self.peek_char() == '/':
@@ -128,3 +123,21 @@ class Lexer:
             self.current_token = self.read_number()
         else:
             self.current_token = self.read_symbol()
+            
+    def read_string_literal(self):
+        start_line = self.line_number
+        start_char = self.char_number
+        start_index = self.index + 1  # start after the opening quotation mark
+        self.next_char()
+        while self.current_char not in ['"', None]:
+            if self.current_char == '\n':
+                self.line_number += 1
+                self.char_number = 0
+            elif self.current_char == '\t':
+                self.char_number += 4
+            else:
+                self.char_number += 1
+            self.index += 1
+            self.current_char = self.input_text[self.index] if self.index < len(self.input_text) else None
+        self.next_char()  # skip the closing quotation mark
+        return Token("STRING", value=self.input_text[start_index:self.index], position=(start_line, start_char))
