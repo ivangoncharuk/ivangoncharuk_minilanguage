@@ -78,6 +78,7 @@ class Lexer:
     def read_symbol(self):
         """
         Read a single character symbol from the input text.
+        Handles multi-character symbols like ':='.
         Raises a SyntaxError for illegal token '***'.
         """
         start_line, start_char = self.line_number, self.char_number
@@ -86,9 +87,15 @@ class Lexer:
             error_msg = f"Illegal token '***' at position ({start_line}, {start_char})"
             raise SyntaxError(error_msg)
 
+        if self.current_char == ':' and self.peek_char() == '=':
+            self.next_char()  # skip ':'
+            self.next_char()  # skip '='
+            return Token(':=', position=(start_line, start_char))
+
         symbol = self.current_char
         self.next_char()
         return Token(symbol, position=(start_line, start_char))
+
     
     def skip_comment(self):
         """
