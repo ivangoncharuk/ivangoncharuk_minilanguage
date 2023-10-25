@@ -1,0 +1,38 @@
+program comprehensive_test_3:
+  // Variable Declarations
+  int x, y, result;
+  bool flag, condition;
+  
+  // Assignment and Arithmetic Operations
+  x := 10;
+  y := 20;
+  result := x + y;
+  
+  // Conditional Statement with Relational Operators
+  if x >= y or y > x then
+    print "x is either greater than or equal to y, or y is greater than x";
+  else
+    print "Neither condition is true";
+  end
+  
+  // Iterative Statement with Comparison and Boolean Operators
+  while not flag and result != 0 do
+    result := result - 1;
+    if result <= 10 then
+      flag := true;
+    end
+  end
+  
+  // Print Statement with Expressions and String Concatenation
+  print "Final value of result: ", result, ", flag: ", flag;
+  
+  // Test String with Special Characters and Escaped Characters
+  print "Special Characters: !@#$%^&*()\nNew line and Tab:\t";
+  
+  // Test Boolean Operations
+  condition := true or false;
+  print "Condition: ", condition;
+  
+  // Test Unary Operator
+  print "Negative result: ", -result;
+end.

@@ -1,45 +1,62 @@
-# Text File Reader
-
-This Python script allows you to read from a text file character by character, displaying each character along with its position in the format `line_number:character_number character`.
+# Lexical Analyzer
+This Python script serves as a lexical analyzer, taking a program written in a simplified programming language and breaking it down into tokens. Each token is associated with its type, value (if applicable), and position in the original text.
 
 ## Prerequisites
-- Python 3.x
+`Python 3.x`
 
 ## Functionalities
-`__init__(self, filename)`: Initializes the FileReader object, opening the specified file and setting initial values for the current line, current column, and current character.
-
-`nextChar(self)`: Reads the next character from the file, updating the current line, current column, and current character values accordingly. If the end of the file is reached, it sets the current character value to "ETX" (End of Text).
-
-`currentChar(self)`: Returns the current character as a string.
-
-`position(self)`: Returns a string containing the current line and column numbers, separated by a colon.
+The Lexer class handles the tokenization of the input text.
+`__init__(self, input_text)`: Initializes the Lexer object with the specified input text.
+`next_token(self)`: Reads the next token from the input text. Updates the current_token attribute with the new token.
+`kind(self)`: Returns the kind of the current token.
+`value(self)`: Returns the value of the current token.
+`position(self)`: Returns the position (line and character number) of the current token.
 
 ## How to Run
-1. Place your text file in an accessible directory.
-2. Navigate to the directory containing the `main.py` script in your terminal or command prompt.
-3. Run the script using the following command:
-`python3 src/main.py`
+Navigate to the directory containing the `main.py` script in your terminal or command prompt.
 
-4. Follow the on-screen prompts to enter the path to your text file. The file must be inside the parent directory of the project itself, and not inside the /src/ directory.
-Type '`quit`' or '`exit`' to stop the program.
+Run the script using the following command:
+
+> `python3 src/main.py`
+
+Follow the on-screen prompts to choose an example to test, or input your own code.
+
+## Testing Options
+- **Predefined examples**: Choose from a list of predefined examples to see how the lexical analyzer tokenizes different constructs.
+- **Custom example**: Input your own code directly into the terminal.
+- **Test from file**: Input the name of a text file (including the extension) to test the lexical analyzer on the contents of that file.
 
 ## Example Output
-For a text file containing "Hello there!", the output will look like this:
+For the input program...
 
 ```
-1:1 H
-1:2 e
-1:3 l
-1:4 l
-1:5 o
-1:6  
-1:7 t
-1:8 h
-1:9 e
-1:10 r
-1:11 e
-1:12 !
+program example:
+int x;
+x := 5;
+print x;
+end.
 ```
 
-## Author
+The output will look like this:
+
+```
+(1:1) program
+(1:9) ID: example
+(1:15) :
+(2:1) int
+(2:5) ID: x
+(2:6) ;
+(3:1) ID: x
+(3:3) :=
+(3:6) NUM: 5
+(3:7) ;
+(4:1) print
+(4:7) ID: x
+(4:8) ;
+(5:1) end
+(5:4) .
+```
+
+
+Author
 Ivan Goncharuk
