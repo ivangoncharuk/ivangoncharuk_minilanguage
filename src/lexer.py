@@ -9,7 +9,6 @@ class Token:
         value = f": {self.value}" if self.value is not None else ""
         return f"{position} {self.kind}{value}"
 
-
 class Lexer:
     def __init__(self, input_text: str):
         self.input_text = input_text
@@ -51,59 +50,77 @@ class Lexer:
             self.next_char()
 
     def read_identifier_or_keyword(self):
+        """
+        Read an identifier or keyword from the input text.
+        Identifiers can include alphanumeric characters and underscores.
+        """
         start_index = self.index
         while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
             self.next_char()
+
         identifier = self.input_text[start_index:self.index]
-        if identifier in self.keywords:
-            return Token(identifier, position=(self.line_number, self.char_number - len(identifier)))
-        return Token("ID", value=identifier, position=(self.line_number, self.char_number - len(identifier)))
+        position = (self.line_number, self.char_number - len(identifier))
+        return Token("ID", value=identifier, position=position) if identifier not in self.keywords else Token(identifier, position=position)
 
     def read_number(self):
+        """
+        Read a number from the input text.
+        """
         start_index = self.index
         while self.current_char and self.current_char.isdigit():
             self.next_char()
+
         number = self.input_text[start_index:self.index]
-        return Token("NUM", value=int(number), position=(self.line_number, self.char_number - len(number)))
+        position = (self.line_number, self.char_number - len(number))
+        return Token("NUM", value=int(number), position=position)
 
     def read_symbol(self):
-        start_line = self.line_number
-        start_char = self.char_number
+        """
+        Read a single character symbol from the input text.
+        Raises a SyntaxError for illegal token '***'.
+        """
+        start_line, start_char = self.line_number, self.char_number
 
-        current_char = self.current_char
-        next_chars = self.input_text[self.index+1:self.index+4]
-
-        if current_char == '*' and next_chars == '**':
+        if self.current_char == '*' and self.input_text[self.index+1:self.index+4] == '**':
             error_msg = f"Illegal token '***' at position ({start_line}, {start_char})"
             raise SyntaxError(error_msg)
 
+        symbol = self.current_char
         self.next_char()
-        return Token(current_char, position=(start_line, start_char))
-
+        return Token(symbol, position=(start_line, start_char))
+    
     def skip_comment(self):
+        """
+        Skip a single-line comment in the input text.
+        """
         while self.current_char and self.current_char != "\n":
             self.next_char()
-        self.next_char()
+        self.next_char()  # Skip the newline character at the end of the comment
 
     def next_token(self):
-        while self.current_char and (self.current_char.isspace() or (self.current_char == '/' and self.peek_char() == '/')):
-            if self.current_char == '/' and self.peek_char() == '/':
+        """
+        Get the next token from the input text.
+        """
+        # Skip whitespaces and comments
+        while self.current_char and (self.current_char.isspace() or self.current_char == '/' and self.peek_char() == '/'):
+            if self.current_char == '/':
                 self.skip_comment()
             else:
                 self.next_char()
                 
-        self.skip_whitespace()
-
+        # Handle end of text
         if not self.current_char:
-            self.current_token = Token("end-of-text", position=(self.line_number, self.char_number))
+            position = (self.line_number, self.char_number)
+            self.current_token = Token("end-of-text", position=position)
             return
-        
+
+        # Handle illegal characters
         illegal_characters = ["!", "@", "^"]
-        
         if self.current_char in illegal_characters:
             error_msg = f"Unexpected symbol '{self.current_char}' at position ({self.line_number}, {self.char_number})"
             raise SyntaxError(error_msg)
             
+        # Generate and set the next token
         if self.current_char == "\"":
             self.current_token = self.read_string_literal()
         elif self.current_char.isalpha() or self.current_char == "_":
@@ -111,26 +128,26 @@ class Lexer:
         elif self.current_char.isdigit():
             self.current_token = self.read_number()
         else:
-            next_chars = self.input_text[self.index:self.index+3]
-            if next_chars == '***':
-                error_msg = f"Illegal token '***' at position ({self.line_number}, {self.char_number})"
-                raise SyntaxError(error_msg)
             self.current_token = self.read_symbol()
-
+    
     def read_string_literal(self):
-        start_line = self.line_number
-        start_char = self.char_number
+        """
+        Read a string literal from the input text.
+        String literals are enclosed in double quotes.
+        """
+        start_line, start_char = self.line_number, self.char_number
         start_index = self.index  # start at the opening quotation mark
         self.next_char()
-        while self.current_char not in ['"', None]:
-            if self.current_char == '\n':
-                self.line_number += 1
-                self.char_number = 0
-            elif self.current_char == '\t':
-                self.char_number += 4
+        
+        while self.current_char and self.current_char != '"':
+            if self.current_char in ['\n', '\t']:
+                self.char_number = 1 if self.current_char == '\n' else self.char_number + 4
+                self.line_number += 1 if self.current_char == '\n' else self.line_number
             else:
                 self.char_number += 1
             self.index += 1
             self.current_char = self.input_text[self.index] if self.index < len(self.input_text) else None
+        
         self.next_char()  # skip the closing quotation mark
-        return Token("STRING", value=self.input_text[start_index:self.index], position=(start_line, start_char))
+        value = self.input_text[start_index:self.index]
+        return Token("STRING", value=value, position=(start_line, start_char))
