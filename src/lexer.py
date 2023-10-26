@@ -18,6 +18,12 @@ class Lexer:
         self.char_number = 1
         self.index = 0
         self.current_token = None
+        self.relational_operators = {'<', '=<' , '=', '!=', '>=', '>'}
+        self.valid_multi_char_tokens = {'=<', '!=', '>=', ':='}
+        self.additive_operators = {'+', '-', 'or'}
+        self.unary_operators = {'-', 'not'}
+        self.assignment_operators = {':='}
+        self.other_symbols = {',',':', ';', '.', '(', ')'}
         self.keywords = {'program', 'if', 'then', 'end', 'do', 'while',
                          'print', 'else', 'int', 'bool', "and", "or", "not"}
 
@@ -82,19 +88,28 @@ class Lexer:
         Raises a SyntaxError for illegal token '***'.
         """
         start_line, start_char = self.line_number, self.char_number
-
-        if self.current_char == '*' and self.input_text[self.index+1:self.index+4] == '**':
-            error_msg = f"Illegal token '***' at position ({start_line}, {start_char})"
-            raise SyntaxError(error_msg)
-
-        if self.current_char == ':' and self.peek_char() == '=':
-            self.next_char()  # skip ':'
-            self.next_char()  # skip '='
-            return Token(':=', position=(start_line, start_char))
-
         symbol = self.current_char
         self.next_char()
-        return Token(symbol, position=(start_line, start_char))
+
+        # Check for multi-character operators
+        potential_multi_char_token = symbol + (self.current_char or '')
+        if potential_multi_char_token in self.valid_multi_char_tokens:
+            symbol = potential_multi_char_token
+            self.next_char()
+
+        # Determine the token type based on the operator
+        if symbol in self.relational_operators:
+            return Token("REL_OP", value=symbol, position=(start_line, start_char))
+        elif symbol in self.additive_operators:
+            return Token("ADD_OP", value=symbol, position=(start_line, start_char))
+        elif symbol in self.unary_operators:
+            return Token("UNARY_OP", value=symbol, position=(start_line, start_char))
+        elif symbol in self.assignment_operators:
+            return Token("ASSIGN_OP", value=symbol, position=(start_line, start_char))
+        elif symbol in self.other_symbols:
+            return Token("SYMBOL", value=symbol, position=(start_line, start_char))
+        else:
+            return Token("OP", value=symbol, position=(start_line, start_char))
 
     
     def skip_comment(self):
@@ -160,18 +175,17 @@ class Lexer:
         """
         Generate the next token based on the current character in the input text.
         """
-        if self.current_char == "\"":
+        if self.current_char == '"':
             self.current_token = self.read_string_literal()
         elif self.current_char.isalpha() or self.current_char == "_":
             self.current_token = self.read_identifier_or_keyword()
         elif self.current_char.isdigit():
             self.current_token = self.read_number()
-        else:
-            next_chars = self.input_text[self.index:self.index+3]
-            if next_chars == '***':
-                error_msg = f"Illegal token '***' at position ({self.line_number}, {self.char_number})"
-                raise SyntaxError(error_msg)
+        elif self.current_char in self.relational_operators.union(self.additive_operators, self.unary_operators, self.assignment_operators, self.other_symbols):
             self.current_token = self.read_symbol()
+        else:
+            error_msg = f"Unexpected character '{self.current_char}' at position ({self.line_number}, {self.char_number})"
+            raise SyntaxError(error_msg)
 
     def next_token(self):
         """
