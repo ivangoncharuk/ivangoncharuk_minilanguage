@@ -4,9 +4,13 @@ class Token:
         self.value = value
         self.position = position
 
-    def __str__(self, max_kind_length=0):
-        position = f"({self.position[0]}:{self.position[1]})" if self.position else "(Unknown Position)"
-        kind = self.kind.ljust(max_kind_length)
+    def __str__(self, max_kind_length=10):
+        position = (
+            f"({self.position[0]:>3}:{self.position[1]:>2})"
+            if self.position
+            else "(Unknown Position)"
+        )
+        kind = f"{self.kind:<{max_kind_length}}"
         value = f" {self.value}" if self.value is not None else ""
         return f"{position} {kind}{value}"
 
@@ -273,5 +277,17 @@ class Lexer:
         self.skip_whitespace_and_comments()
         if self.set_end_of_text_token():
             return
+
+        if self.current_char == "!":
+            if self.peek_char() == "=":
+                self.current_token = Token(
+                    "RELATIONAL_OP",
+                    value="!=",
+                    position=(self.line_number, self.char_number),
+                )
+                self.next_char()
+                self.next_char()
+                return
+
         self.check_for_illegal_characters()
         self.generate_token_based_on_current_char()

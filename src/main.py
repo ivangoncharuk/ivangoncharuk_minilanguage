@@ -65,11 +65,12 @@ class TestLexer:
         tokens = []
         while True:
             self.lexer.next_token()
+            tokens.append(self.lexer.current_token)
             if self.lexer.kind() == "end-of-text":
                 break
-            tokens.append(self.lexer.current_token)
         print("Tokens:")
         self.print_tokens(tokens)
+
 
 if __name__ == "__main__":
     tester = TestLexer()
