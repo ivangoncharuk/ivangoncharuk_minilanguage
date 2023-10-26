@@ -27,9 +27,9 @@ class TestLexer:
         }
 
     def print_tokens(self, tokens):
-        max_kind_length = max(len(token.kind) for token in tokens)
+        max_value_length = max(len(str(token.value)) for token in tokens if token.value is not None)
         for token in tokens:
-            print(token.__str__(max_kind_length))
+            print(token.__str__(max_value_length))
 
     def run(self):
         while True:
