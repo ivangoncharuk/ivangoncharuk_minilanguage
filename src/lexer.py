@@ -4,13 +4,15 @@ class Token:
         self.value = value
         self.position = position
 
-    def __str__(self, max_kind_length=10):
+    def __str__(self, max_kind_length=0):
         position = (
-            f"({self.position[0]:>3}:{self.position[1]:>2})"
+            f"({self.position[0]: >3} :{self.position[1]: >3}  )"
             if self.position
             else "(Unknown Position)"
         )
-        kind = f"{self.kind:<{max_kind_length}}"
+        kind = (
+            self.kind if self.kind and self.kind not in {":", ",", ";", "."} else ""
+        ).ljust(max_kind_length)
         value = f" {self.value}" if self.value is not None else ""
         return f"{position} {kind}{value}"
 
@@ -136,19 +138,19 @@ class Lexer:
 
         # Determine the token type based on the operator
         if symbol in self.relational_operators:
-            return Token(
-                "RELATIONAL_OP", value=symbol, position=(start_line, start_char)
-            )
+            kind = "RELATIONAL_OP"
         elif symbol in self.additive_operators:
-            return Token("ADD_OP", value=symbol, position=(start_line, start_char))
+            kind = "ADD_OP"
         elif symbol in self.unary_operators:
-            return Token("UNARY_OP", value=symbol, position=(start_line, start_char))
+            kind = "UNARY_OP"
         elif symbol in self.assignment_operators:
-            return Token("ASSIGN_OP", value=symbol, position=(start_line, start_char))
+            kind = "ASSIGN_OP"
         elif symbol in self.other_symbols:
-            return Token("", value=symbol, position=(start_line, start_char))
+            kind = symbol  # Set kind to the symbol itself
         else:
-            return Token("", value=symbol, position=(start_line, start_char))
+            kind = "UNKNOWN"
+
+        return Token(kind, value=symbol, position=(start_line, start_char))
 
     def skip_comment(self):
         """

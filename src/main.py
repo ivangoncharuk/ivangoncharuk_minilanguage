@@ -1,22 +1,36 @@
 import os
 import lexer
 
+
 class TestLexer:
     def __init__(self):
         self.lexer = lexer.Lexer("")
         self.examples = {
-            1: ("Basic Arithmetic", "program example_1: int a, b; a := 5; b := 10; print a + b; end."),
-            2: ("Conditional Statements", "program example_2: int x; x := 5; if x > 0 then print 'Positive'; else print 'Non-Positive'; end end."),
-            3: ("While Loop", "program example_3: int i; i := 0; while i < 5 do print i; i := i + 1; end end."),
-            4: ("Lexically Not OK", "program lexically_not_Ok: intt a; int b; a :== 2; b := 5; while (a!b) do not print else do int b@; b := 2 *** a; print b^2; a := a $ 1 end %; print b~ end."),
+            1: (
+                "Basic Arithmetic",
+                "program example_1: int a, b; a := 5; b := 10; print a + b; end.",
+            ),
+            2: (
+                "Conditional Statements",
+                "program example_2: int x; x := 5; if x > 0 then print 'Positive'; else print 'Non-Positive'; end end.",
+            ),
+            3: (
+                "While Loop",
+                "program example_3: int i; i := 0; while i < 5 do print i; i := i + 1; end end.",
+            ),
+            4: (
+                "Lexically Not OK",
+                "program lexically_not_Ok: intt a; int b; a :== 2; b := 5; while (a!b) do not print else do int b@; b := 2 *** a; print b^2; a := a $ 1 end %; print b~ end.",
+            ),
             5: ("Custom Example", ""),
-            6: ("Test From File", "")
+            6: ("Test From File", ""),
         }
+
     def print_tokens(self, tokens):
         max_kind_length = max(len(token.kind) for token in tokens)
         for token in tokens:
             print(token.__str__(max_kind_length))
-    
+
     def run(self):
         while True:
             print("\nChoose an example to test the lexical analyzer:")
@@ -41,12 +55,14 @@ class TestLexer:
                 print("Invalid choice. Please choose a valid example.")
 
     def test_from_file(self):
-        file_name = input("\nEnter the name of the file to test (including extension): ")
+        file_name = input(
+            "\nEnter the name of the file to test (including extension): "
+        )
         if not os.path.isfile(file_name):
             print(f"The file {file_name} does not exist.")
             return
 
-        with open(file_name, 'r') as f:
+        with open(file_name, "r") as f:
             file_content = f.read()
 
         self.test_code(file_content)
