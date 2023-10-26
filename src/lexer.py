@@ -4,10 +4,11 @@ class Token:
         self.value = value
         self.position = position
 
-    def __str__(self):
+    def __str__(self, max_kind_length=0):
         position = f"({self.position[0]}:{self.position[1]})" if self.position else "(Unknown Position)"
-        value = f": {self.value}" if self.value is not None else ""
-        return f"{position} {self.kind}{value}"
+        kind = self.kind.ljust(max_kind_length)
+        value = f" {self.value}" if self.value is not None else ""
+        return f"{position} {kind}{value}"
 
 
 class Lexer:
@@ -18,14 +19,34 @@ class Lexer:
         self.char_number = 1
         self.index = 0
         self.current_token = None
-        self.relational_operators = {'<', '=<' , '=', '!=', '>=', '>'}
-        self.valid_multi_char_tokens = {'=<', '!=', '>=', ':='}
-        self.additive_operators = {'+', '-', 'or'}
-        self.unary_operators = {'-', 'not'}
-        self.assignment_operators = {':='}
-        self.other_symbols = {',',':', ';', '.', '(', ')', '\'', '\"'}
-        self.keywords = {'program', 'if', 'then', 'end', 'do', 'while',
-                         'print', 'else', 'int', 'bool', "and", "or", "not"}
+        self.relational_operators = {"<", "=<", "=", "!=", ">=", ">"}
+        self.valid_multi_char_tokens = {"=<", "!=", ">=", ":="}
+        self.additive_operators = {"+", "-", "or"}
+        self.multiplicative_operators = {"*", "/", "mod", "and"}
+        self.unary_operators = {"-", "not"}
+        self.assignment_operators = {":="}
+        self.operators = (
+            self.additive_operators.union(self.multiplicative_operators)
+            .union(self.unary_operators)
+            .union(self.relational_operators)
+        )
+
+        self.other_symbols = {",", ":", ";", ".", "(", ")", "'", '"'}
+        self.keywords = {
+            "program",
+            "if",
+            "then",
+            "end",
+            "do",
+            "while",
+            "print",
+            "else",
+            "int",
+            "bool",
+            "and",
+            "or",
+            "not",
+        }
 
     def next_char(self):
         """Move to the next character in the input text."""
@@ -36,12 +57,18 @@ class Lexer:
             else:
                 self.char_number += 4 if self.current_char == "\t" else 1
             self.index += 1
-            self.current_char = self.input_text[self.index] if self.index < len(self.input_text) else None
+            self.current_char = (
+                self.input_text[self.index]
+                if self.index < len(self.input_text)
+                else None
+            )
 
     def peek_char(self) -> str:
         """Look at the next character in the input text without moving the current position."""
         peek_index = self.index + 1
-        return self.input_text[peek_index] if peek_index < len(self.input_text) else None
+        return (
+            self.input_text[peek_index] if peek_index < len(self.input_text) else None
+        )
 
     def kind(self):
         return self.current_token.kind if self.current_token else None
@@ -62,12 +89,18 @@ class Lexer:
         Identifiers can include alphanumeric characters and underscores.
         """
         start_index = self.index
-        while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
+        while self.current_char and (
+            self.current_char.isalnum() or self.current_char == "_"
+        ):
             self.next_char()
 
-        identifier = self.input_text[start_index:self.index]
+        identifier = self.input_text[start_index : self.index]
         position = (self.line_number, self.char_number - len(identifier))
-        return Token("ID", value=identifier, position=position) if identifier not in self.keywords else Token(identifier, position=position)
+        return (
+            Token("ID", value=identifier, position=position)
+            if identifier not in self.keywords
+            else Token(identifier, position=position)
+        )
 
     def read_number(self):
         """
@@ -77,7 +110,7 @@ class Lexer:
         while self.current_char and self.current_char.isdigit():
             self.next_char()
 
-        number = self.input_text[start_index:self.index]
+        number = self.input_text[start_index : self.index]
         position = (self.line_number, self.char_number - len(number))
         return Token("NUM", value=int(number), position=position)
 
@@ -92,14 +125,16 @@ class Lexer:
         self.next_char()
 
         # Check for multi-character operators
-        potential_multi_char_token = symbol + (self.current_char or '')
+        potential_multi_char_token = symbol + (self.current_char or "")
         if potential_multi_char_token in self.valid_multi_char_tokens:
             symbol = potential_multi_char_token
             self.next_char()
 
         # Determine the token type based on the operator
         if symbol in self.relational_operators:
-            return Token("REL_OP", value=symbol, position=(start_line, start_char))
+            return Token(
+                "RELATIONAL_OP", value=symbol, position=(start_line, start_char)
+            )
         elif symbol in self.additive_operators:
             return Token("ADD_OP", value=symbol, position=(start_line, start_char))
         elif symbol in self.unary_operators:
@@ -107,11 +142,10 @@ class Lexer:
         elif symbol in self.assignment_operators:
             return Token("ASSIGN_OP", value=symbol, position=(start_line, start_char))
         elif symbol in self.other_symbols:
-            return Token("SYMBOL", value=symbol, position=(start_line, start_char))
+            return Token("", value=symbol, position=(start_line, start_char))
         else:
-            return Token("OP", value=symbol, position=(start_line, start_char))
+            return Token("", value=symbol, position=(start_line, start_char))
 
-    
     def skip_comment(self):
         """
         Skip a single-line comment in the input text.
@@ -127,31 +161,46 @@ class Lexer:
         """
         start_line, start_char = self.line_number, self.char_number
         start_index = self.index  # start at the opening quotation mark
-        quote_type = self.current_char  # Save the type of quote used to start the string
+        quote_type = (
+            self.current_char
+        )  # Save the type of quote used to start the string
         self.next_char()
-        
+
         while self.current_char and self.current_char != quote_type:
-            if self.current_char in ['\n', '\t']:
-                self.char_number = 1 if self.current_char == '\n' else self.char_number + 4
-                self.line_number += 1 if self.current_char == '\n' else self.line_number
+            if self.current_char in ["\n", "\t"]:
+                self.char_number = (
+                    1 if self.current_char == "\n" else self.char_number + 4
+                )
+                self.line_number += 1 if self.current_char == "\n" else self.line_number
             else:
                 self.char_number += 1
             self.index += 1
-            self.current_char = self.input_text[self.index] if self.index < len(self.input_text) else None
-        
+            self.current_char = (
+                self.input_text[self.index]
+                if self.index < len(self.input_text)
+                else None
+            )
+
         if not self.current_char:
-            raise SyntaxError(f"Unclosed string literal at position ({start_line}, {start_char})")
-        
+            raise SyntaxError(
+                f"Unclosed string literal at position ({start_line}, {start_char})"
+            )
+
         self.next_char()  # skip the closing quotation mark
-        value = self.input_text[start_index+1:self.index-1]  # Exclude the quotes from the value
+        value = self.input_text[
+            start_index + 1 : self.index - 1
+        ]  # Exclude the quotes from the value
         return Token("STRING", value=value, position=(start_line, start_char))
 
     def skip_whitespace_and_comments(self):
         """
         Skip whitespaces and single-line comments in the input text.
         """
-        while self.current_char and (self.current_char.isspace() or (self.current_char == '/' and self.peek_char() == '/')):
-            if self.current_char == '/' and self.peek_char() == '/':
+        while self.current_char and (
+            self.current_char.isspace()
+            or (self.current_char == "/" and self.peek_char() == "/")
+        ):
+            if self.current_char == "/" and self.peek_char() == "/":
                 self.skip_comment()
             else:
                 self.next_char()
@@ -182,14 +231,40 @@ class Lexer:
         if self.current_char in {'"', "'"}:
             self.current_token = self.read_string_literal()
         elif self.current_char.isalpha() or self.current_char == "_":
-            self.current_token = self.read_identifier_or_keyword()
+            # Check if the current token is "mod"
+            if self.input_text[self.index : self.index + 3] == "mod":
+                self.current_token = Token(
+                    "MUL_OP", value="mod", position=(self.line_number, self.char_number)
+                )
+                self.index += 3
+                self.char_number += 3
+                self.current_char = (
+                    self.input_text[self.index]
+                    if self.index < len(self.input_text)
+                    else None
+                )
+            else:
+                self.current_token = self.read_identifier_or_keyword()
         elif self.current_char.isdigit():
             self.current_token = self.read_number()
-        elif self.current_char in self.relational_operators.union(self.additive_operators, self.unary_operators, self.assignment_operators, self.other_symbols):
+        elif self.current_char in self.relational_operators.union(
+            self.additive_operators,
+            self.unary_operators,
+            self.assignment_operators,
+            self.other_symbols,
+        ):
             self.current_token = self.read_symbol()
-        else:
-            error_msg = f"Unexpected character '{self.current_char}' at position ({self.line_number}, {self.char_number})"
-            raise SyntaxError(error_msg)
+        elif self.current_char in self.multiplicative_operators:
+            if self.current_char == "*" or self.current_char == "/":
+                self.current_token = Token(
+                    "MUL_OP",
+                    value=self.current_char,
+                    position=(self.line_number, self.char_number),
+                )
+                self.next_char()
+            else:
+                error_msg = f"Unexpected character '{self.current_char}' at position ({self.line_number}, {self.char_number})"
+                raise SyntaxError(error_msg)
 
     def next_token(self):
         """

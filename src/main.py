@@ -12,7 +12,11 @@ class TestLexer:
             5: ("Custom Example", ""),
             6: ("Test From File", "")
         }
-
+    def print_tokens(self, tokens):
+        max_kind_length = max(len(token.kind) for token in tokens)
+        for token in tokens:
+            print(token.__str__(max_kind_length))
+    
     def run(self):
         while True:
             print("\nChoose an example to test the lexical analyzer:")
@@ -58,12 +62,14 @@ class TestLexer:
 
     def test_code(self, code):
         self.lexer.__init__(code)
-        print("Tokens:")
+        tokens = []
         while True:
             self.lexer.next_token()
             if self.lexer.kind() == "end-of-text":
                 break
-            print(self.lexer.current_token)
+            tokens.append(self.lexer.current_token)
+        print("Tokens:")
+        self.print_tokens(tokens)
 
 if __name__ == "__main__":
     tester = TestLexer()
