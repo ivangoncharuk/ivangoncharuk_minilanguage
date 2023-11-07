@@ -7,7 +7,7 @@ class Token:
     def __str__(self, max_value_length=0):
         # Format the position of the token. If the position is unknown, display "Unknown Position".
         position = (
-            f"({self.position[0]: >3} :{self.position[1]: >3} )"  # Align the line and column numbers to the right
+            f"({self.position[0]: >3} :{self.position[1]: >3}  )"  # Align the line and column numbers to the right
             if self.position
             else "(Unknown Position)"
         )
@@ -34,7 +34,7 @@ class Token:
             kind = " end-of-text"
 
         # Combine the formatted position, value, and kind into a single string and return it.
-        return f"{position}{value}{kind}"
+        return f"{position} {value}{kind}"
 
 
 class Lexer:
@@ -76,7 +76,7 @@ class Lexer:
 
     def next_char(self):
         """Move to the next character in the input text."""
-        if self.current_char:
+        if self.current_char: 
             if self.current_char == "\n":
                 self.line_number += 1
                 self.char_number = 1
@@ -143,8 +143,6 @@ class Lexer:
     def read_symbol(self):
         """
         Read a single character symbol from the input text.
-        Handles multi-character symbols like ':='.
-        Raises a SyntaxError for illegal token '***'.
         """
         start_line, start_char = self.line_number, self.char_number
         symbol = self.current_char
@@ -167,19 +165,8 @@ class Lexer:
             kind = "ASSIGN_OP"
         elif symbol in self.other_symbols:
             kind = symbol  # Set kind to the symbol itself
-        elif symbol in self.multiplicative_operators:
-            kind = "MUL_OP"
         else:
             kind = "UNKNOWN"
-
-            # Check if the next character is also a symbol and not a whitespace
-            if (
-                self.current_char
-                and not self.current_char.isspace()
-                and not self.current_char.isalnum()
-            ):
-                error_msg = f"Undefined token '{symbol}' at position ({start_line}, {start_char})"
-                raise SyntaxError(error_msg)
 
         return Token(kind, value=symbol, position=(start_line, start_char))
 
@@ -256,29 +243,15 @@ class Lexer:
         """
         Check for any illegal characters in the input text and raise a SyntaxError if found.
         """
-        illegal_characters = ["!", "@", "^"]
+        illegal_characters = ["!", "@", "^", "\\"]
         if self.current_char in illegal_characters:
             error_msg = f"Unexpected symbol '{self.current_char}' at position ({self.line_number}, {self.char_number})"
             raise SyntaxError(error_msg)
-
-    def check_for_invalid_token_combinations(self):
-        """
-        Check for invalid combinations of characters and raise a SyntaxError if found.
-        """
-        if self.current_char in self.operators or self.current_char in self.other_symbols:
-            next_char = self.peek_char()
-            if next_char and (next_char in self.operators or next_char in self.other_symbols):
-                combined_token = self.current_char + next_char
-                if combined_token not in self.valid_multi_char_tokens:
-                    error_msg = f"Invalid token '{combined_token}' at position ({self.line_number}, {self.char_number})"
-                    raise SyntaxError(error_msg)
 
     def generate_token_based_on_current_char(self):
         """
         Generate the next token based on the current character in the input text.
         """
-        self.check_for_invalid_token_combinations()
-        
         if self.current_char in {'"', "'"}:
             self.current_token = self.read_string_literal()
         elif self.current_char.isalpha() or self.current_char == "_":
