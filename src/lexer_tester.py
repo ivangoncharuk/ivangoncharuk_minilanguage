@@ -88,6 +88,6 @@ class TestLexer:
         self.print_tokens(tokens)
 
 
-if __name__ == "__main__":
-    tester = TestLexer()
-    tester.run()
+# if __name__ == "__main__":
+#     tester = TestLexer()
+#     tester.run()
