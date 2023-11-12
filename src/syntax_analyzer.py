@@ -28,27 +28,77 @@ class SyntaxAnalyzer:
         return True
 
     def body(self):
-        if not self.declarations():
-            return False
+        if self.current_token.kind in {"bool", "int"}:
+            if not self.declarations():
+                return False
         if not self.statements():
             return False
         return True
+
     
     def declarations(self):
-        while self.is_declaration_start():
+        while self.current_token.kind in {"bool", "int"}:
             if not self.single_declaration():
                 return False
         return True
 
-    def is_declaration_start(self):
-        # Implement logic to determine if the current token starts a declaration
-        return False
-
     def single_declaration(self):
-        # Implement logic for parsing a single declaration
+        if not self.match(self.current_token.kind):  # Match "bool" or "int"
+            return False
+        if not self.match("ID"):
+            return False
+        while self.current_token.kind == ",":
+            self.match(",")
+            if not self.match("ID"):
+                return False
+        if not self.match(";"):
+            return False
         return True
 
     def statements(self):
-        # Placeholder for statements method
-        # Implement the logic to validate statements
+        while self.current_token.kind is not None and self.current_token.kind != "end":
+            if not self.statement():
+                return False
+            if self.current_token.kind != "end":
+                if not self.match(";"):
+                    return False
+        return True
+
+    def statement(self):
+        if self.current_token.kind == "if":
+            return self.conditional_statement()
+        elif self.current_token.kind == "while":
+            return self.iterative_statement()
+        elif self.current_token.kind == "print":
+            return self.print_statement()
+        else:
+            return self.assignment_statement()
+
+    def conditional_statement(self):
+        return True
+
+    def iterative_statement(self):
+        return True
+
+    def print_statement(self):
+        return True
+
+    def assignment_statement(self):
+        if not self.match("ID"):
+            return False
+        if not self.match(":="):
+            return False
+        if not self.expression():
+            return False
+        return True
+
+    def expression(self):
+        return True
+
+    def is_declaration_start(self):
+        # TODO Implement logic to determine if the current token starts a declaration
+        return False
+
+    def single_declaration(self):
+        # TODO Implement logic for parsing a single declaration
         return True
