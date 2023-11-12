@@ -35,33 +35,38 @@ class SyntaxAnalyzer:
             return False
         return True
 
-    
     def declarations(self):
         while self.current_token.kind in {"bool", "int"}:
             if not self.single_declaration():
                 return False
+        print(f"Token after processing all declarations: {self.current_token.kind}")  # Debugging
         return True
 
     def single_declaration(self):
+        print(f"Processing declaration, starting token: {self.current_token.kind}")  # Debugging
         if not self.match(self.current_token.kind):  # Match "bool" or "int"
             return False
-        if not self.match("ID"):
-            return False
-        while self.current_token.kind == ",":
-            self.match(",")
+        while self.current_token.kind == "ID":
             if not self.match("ID"):
                 return False
-        if not self.match(";"):
+            if self.current_token.kind == ",":
+                if not self.match(","):
+                    return False
+        if not self.match(";"):  # Ensure this advances past the semicolon
             return False
+        print(f"Token after processing declaration: {self.current_token.kind}")  # Debugging
         return True
 
+
     def statements(self):
+        print(f"First token in statements: {self.current_token.kind}")  # Debugging
         while self.current_token.kind is not None and self.current_token.kind != "end":
             if not self.statement():
                 return False
             if self.current_token.kind != "end":
                 if not self.match(";"):
                     return False
+        print(f"Token after processing statements: {self.current_token.kind}")  # Debugging
         return True
 
     def statement(self):
@@ -98,7 +103,3 @@ class SyntaxAnalyzer:
     def is_declaration_start(self):
         # TODO Implement logic to determine if the current token starts a declaration
         return False
-
-    def single_declaration(self):
-        # TODO Implement logic for parsing a single declaration
-        return True
