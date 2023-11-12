@@ -311,3 +311,4 @@ class Lexer:
 
         self.check_for_illegal_characters()
         self.generate_token_based_on_current_char()
+        print(f"Generated token (in lexer:next_token() ): {self.current_token}")  # Debugging line
