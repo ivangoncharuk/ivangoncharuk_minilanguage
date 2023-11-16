@@ -1,0 +1,22 @@
+program fibonacci:
+    int n, first, second, next, c;
+
+    // Initialize variables
+    n := 10;
+    first := 0;
+    second := 1;
+    c := 0;
+
+    // Print the first two terms
+    print first;
+    print second;
+
+    // Generate the rest of the sequence
+    while c < n - 2 do
+        next := first + second;
+        first := second;
+        second := next;
+        print next;
+        c := c + 1;
+    end
+    .

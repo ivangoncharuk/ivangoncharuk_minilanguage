@@ -1,0 +1,24 @@
+program checkPrime:
+    int number, i, flag;
+
+    // Initialize variables
+    number := 17;
+    flag := 0;
+    i := 2;
+
+    // Check for prime number
+    while i <= number / 2 do
+        if number mod i = 0 then
+            flag := 1;
+            break;
+        end;
+        i := i + 1;
+    end;
+
+    // Print result
+    if flag = 0 then
+        print true;  // Number is prime
+    else
+        print false; // Number is not prime
+    end
+    .

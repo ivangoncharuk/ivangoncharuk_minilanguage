@@ -1,0 +1,16 @@
+program sumNumbers:
+    int limit, sum, i;
+
+    // Initialize variables
+    limit := 10;
+    sum := 0;
+    i := 1;
+
+    // Calculate sum
+    while i <= limit do
+        sum := sum + i;
+        i := i + 1;
+    end;
+
+    // Print the sum
+    print sum.
