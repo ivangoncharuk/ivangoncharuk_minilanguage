@@ -1,4 +1,5 @@
-from lexer import Lexer, Token
+from src.lexer import Lexer, Token
+from icecream import ic
 
 
 class SyntaxAnalyzer:
@@ -7,99 +8,145 @@ class SyntaxAnalyzer:
         self.lexer.next_token()  # Load the first token
         self.current_token = self.lexer.current_token
 
-    def match(self, expected_kind):
-        if self.current_token and self.current_token.kind == expected_kind:
-            self.lexer.next_token()  # Move to the next token
-            self.current_token = self.lexer.current_token  # Update the current token
-            return True
-        return False
+    def consume(self):
+        self.lexer.next_token()
+        self.current_token = self.lexer.current_token
+
+    def match(self, expected_token_kind):
+        if self.current_token and self.current_token.kind == expected_token_kind:
+            self.consume()
+        else:
+            self.error(expected_token_kind)
+
+    def error(self, expected_symbol):
+        position = self.current_token.position if self.current_token else "Unknown"
+        print(f"Error: Unexpected Token: '{self.current_token.kind}' at {position}")
+        print(
+            f"{position}: >>>>>> Bad Symbol '{self.current_token.kind}': expected '{expected_symbol}'"
+        )
+        exit(1)
 
     def program(self):
-        if not self.match("program"):
-            return False
-        if not self.match("ID"):
-            return False
-        if not self.match(":"):
-            return False
-        if not self.body():
-            return False
-        if not self.match("end"):
-            return False
-        return True
+        self.match("program")
+        self.identifier()
+        self.match(":")
+        self.body()
+        self.match(".")
 
     def body(self):
         if self.current_token.kind in {"bool", "int"}:
-            if not self.declarations():
-                return False
-        if not self.statements():
-            return False
-        return True
+            self.declarations()
+        self.statements()
 
     def declarations(self):
+        self.declaration()
         while self.current_token.kind in {"bool", "int"}:
-            if not self.single_declaration():
-                return False
-        print(f"Token after processing all declarations: {self.current_token.kind}")  # Debugging
-        return True
+            self.declaration()
 
-    def single_declaration(self):
-        print(f"Processing declaration, starting token: {self.current_token.kind}")  # Debugging
-        if not self.match(self.current_token.kind):  # Match "bool" or "int"
-            return False
-        while self.current_token.kind == "ID":
-            if not self.match("ID"):
-                return False
-            if self.current_token.kind == ",":
-                if not self.match(","):
-                    return False
-        if not self.match(";"):  # Ensure this advances past the semicolon
-            return False
-        print(f"Token after processing declaration: {self.current_token.kind}")  # Debugging
-        return True
-
+    def declaration(self):
+        if self.current_token.kind in {"bool", "int"}:
+            self.consume()
+            self.match("ID")
+            while self.current_token.kind == ",":
+                self.consume()
+                self.match("ID")
+            self.match(";")
+        else:
+            self.error("'bool' or 'int'")
 
     def statements(self):
-        print(f"First token in statements: {self.current_token.kind}")  # Debugging
-        while self.current_token.kind is not None and self.current_token.kind != "end":
-            if not self.statement():
-                return False
-            if self.current_token.kind != "end":
-                if not self.match(";"):
-                    return False
-        print(f"Token after processing statements: {self.current_token.kind}")  # Debugging
-        return True
+        self.statement()
+        while self.current_token.kind == ";":
+            self.consume()
+            self.statement()
 
     def statement(self):
-        if self.current_token.kind == "if":
-            return self.conditional_statement()
+        if self.current_token.kind == "ID":
+            self.assignment()
+        elif self.current_token.kind == "if":
+            self.conditional()
         elif self.current_token.kind == "while":
-            return self.iterative_statement()
+            self.iterative()
         elif self.current_token.kind == "print":
-            return self.print_statement()
+            self.print_statement()
         else:
-            return self.assignment_statement()
+            self.error("ID, if, while, or print")
 
-    def conditional_statement(self):
-        return True
+    def assignment(self):
+        if self.current_token.kind == "ID":
+            self.match("ID")
+            self.match(":=")
+            self.expression()
+        else:
+            self.error("ID")
 
-    def iterative_statement(self):
-        return True
+    def conditional(self):
+        self.match("if")
+        self.expression()
+        self.match("then")
+        self.body()
+        if self.current_token.kind == "else":
+            self.consume()
+            self.body()
+        self.match("end")
+
+    def iterative(self):
+        self.match("while")
+        self.expression()
+        self.match("do")
+        self.body()
+        self.match("end")
 
     def print_statement(self):
-        return True
-
-    def assignment_statement(self):
-        if not self.match("ID"):
-            return False
-        if not self.match(":="):
-            return False
-        if not self.expression():
-            return False
-        return True
+        self.match("print")
+        self.expression()
 
     def expression(self):
-        return True
+        self.simple_expression()
+        if self.current_token.kind in {"<", "=<", "=", "!=", ">=", ">"}:
+            self.match(self.current_token.kind)
+            self.simple_expression()
 
-    def is_declaration_start(self):
-        # TODO Implement logic to determine if the current token starts a declaration
-        return False
+    def simple_expression(self):
+        self.term()
+        while self.current_token.kind in {"+", "-", "or"}:
+            self.consume()
+            self.term()
+
+    def term(self):
+        self.factor()
+        while self.current_token.kind in {"*", "/", "mod", "and"}:
+            self.consume()
+            self.factor()
+
+    def factor(self):
+        if self.current_token.kind in {"-", "not"}:
+            self.consume()
+        if self.current_token.kind in {"false", "true", "NUM"}:
+            self.literal()
+        elif self.current_token.kind == "ID":
+            self.consume()
+        elif self.current_token.kind == "(":
+            self.consume()
+            self.expression()
+            self.match(")")
+        else:
+            self.error("Expected: 'true', 'false', 'NUM', 'ID', '('")
+
+    def literal(self):
+        if self.current_token.kind == "NUM":
+            self.consume()
+        else:
+            self.boolean_literal()
+
+    def boolean_literal(self):
+        if self.current_token.kind in {"false", "true"}:
+            self.consume()
+        else:
+            self.error("Expected: 'false' or 'true'")
+
+    def identifier(self):
+        if self.current_token.kind == "ID":
+            self.consume()
+        else:
+            self.error("Expected: ID")

@@ -1,10 +1,11 @@
 import os
-import lexer
+
+from src.lexer import Lexer
 
 
 class TestLexer:
     def __init__(self):
-        self.lexer = lexer.Lexer("")
+        self.lexer = Lexer("")
         self.examples = {
             1: (
                 "Basic Arithmetic",
@@ -25,11 +26,6 @@ class TestLexer:
             5: ("Custom Example", ""),
             6: ("Test From File", ""),
         }
-
-    def print_tokens(self, tokens):
-        max_value_length = max(len(str(token.value)) for token in tokens if token.value is not None)
-        for token in tokens:
-            print(token.__str__(max_value_length))
 
     def run(self):
         while True:
@@ -53,6 +49,13 @@ class TestLexer:
                 self.test_example(choice)
             else:
                 print("Invalid choice. Please choose a valid example.")
+
+    def print_tokens(self, tokens):
+        max_value_length = max(
+            len(str(token.value)) for token in tokens if token.value is not None
+        )
+        for token in tokens:
+            print(token.__str__(max_value_length))
 
     def test_from_file(self):
         file_name = input(
@@ -82,11 +85,11 @@ class TestLexer:
         while True:
             self.lexer.next_token()
             tokens.append(self.lexer.current_token)
+            print(self.lexer.current_token)
             if self.lexer.kind() == "end-of-text":
                 break
-        print("Tokens:")
+        # print("Tokens:")
         self.print_tokens(tokens)
-
 
 if __name__ == "__main__":
     tester = TestLexer()

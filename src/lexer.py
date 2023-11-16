@@ -76,7 +76,7 @@ class Lexer:
 
     def next_char(self):
         """Move to the next character in the input text."""
-        if self.current_char: 
+        if self.current_char:
             if self.current_char == "\n":
                 self.line_number += 1
                 self.char_number = 1
