@@ -6,6 +6,8 @@ sys.path.append(".")  # need this to run
 from src.lexer import Lexer
 from src.syntax_analyzer import SyntaxAnalyzer
 
+should_clear_screen = True  # Default setting
+
 
 def test_file(file_path):
     try:
@@ -20,9 +22,7 @@ def test_file(file_path):
 
 
 def get_files_from_directory(directory_path):
-    return glob.glob(
-        os.path.join(directory_path, "*.txt")
-    )  # Change extension if needed
+    return glob.glob(os.path.join(directory_path, "*.txt"))
 
 
 def list_files_and_get_choice(files):
@@ -33,10 +33,18 @@ def list_files_and_get_choice(files):
 
 
 def clear_screen():
-    if os.name == "nt":  # for Windows
-        subprocess.call("cls", shell=True)
-    else:  # for MacOS and Linux
-        subprocess.call("clear", shell=True)
+    global should_clear_screen
+    if should_clear_screen:
+        if os.name == "nt":  # for Windows
+            subprocess.call("cls", shell=True)
+        else:  # for MacOS and Linux
+            subprocess.call("clear", shell=True)
+
+
+def toggle_screen_clearing():
+    global should_clear_screen
+    should_clear_screen = not should_clear_screen
+    print(f"Screen clearing {'enabled' if should_clear_screen else 'disabled'}.")
 
 
 def main():
@@ -45,6 +53,11 @@ def main():
         print("\n1. Test Correct Syntax")
         print("2. Test Incorrect Syntax")
         print("3. Enter a custom file path")
+        print(
+            "4. Toggle Screen Clearing (currently {})".format(
+                "On" if should_clear_screen else "Off"
+            )
+        )
         print("0. Exit")
 
         choice = int(input("\nEnter your choice: "))
@@ -67,8 +80,12 @@ def main():
             custom_path = input("\nEnter the custom file path: ")
             test_file(custom_path)
 
+        elif choice == 4:
+            toggle_screen_clearing()
+
         elif choice == 0:
-            clear_screen()
+            if should_clear_screen:
+                clear_screen()
             print("Exiting.")
             break
 
