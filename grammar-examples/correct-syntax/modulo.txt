@@ -1,4 +1,4 @@
-program modulo:
+program mobdulo: // can't use mod inside id name :()
   int a, b, c;
   bool eq;
   a := 8;

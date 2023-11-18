@@ -178,7 +178,16 @@ class TestSyntaxAnalyzer(unittest.TestCase):
 
     def test_complex_conditional_statement(self):
         lexer = Lexer(
-            "if x < y and y > z then print x; elif y <= z then print y; else print z; end;"
+            """
+if x < y and y > z then 
+    print x; 
+else 
+    if x > y and y = x then
+        print x + y;
+    end
+end
+.
+"""
         )
         analyzer = SyntaxAnalyzer(lexer)
         try:
@@ -460,6 +469,69 @@ program bad_scoping:
    bool a;
    a := a
 .
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_while_ab_print_twenty(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """// This program should print the number 20.
+program Twenty:
+  int a;
+  int b;
+  a := 2;
+  b := 1;
+  if not (a < 0) then
+    int b;
+    b := - 2;     //     (the inner b, the outer one is still 1)
+    a := a * b    // a = -4
+  else
+    int c;
+    c := a - b;
+    a := a * (c - b)
+  end;
+  print a * (a - b)    // -4 * (-4 - 1)  =  -4 * (-5)  =  20
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_cond_ab_print_twenty(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """// This program should print the number 20.
+program Twenty:
+  int a;
+  int b;
+  a := 2;
+  b := 1;
+  if not (a < 0) then
+    int b;
+    b := - 2;     //     (the inner b, the outer one is still 1)
+    a := a * b    // a = -4
+  else
+    int c;
+    c := a - b;
+    a := a * (c - b)
+  end;
+  print a * (a - b)    // -4 * (-4 - 1)  =  -4 * (-5)  =  20
+.
+
 """
         )
         analyzer = SyntaxAnalyzer(lexer)

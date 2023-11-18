@@ -107,7 +107,7 @@ class SyntaxAnalyzer:
 
     def expression(self):
         self.simple_expression()
-        if self.current_token.kind in {
+        while self.current_token.kind in {
             "RELATIONAL_OP",
             "and",
             "or",
