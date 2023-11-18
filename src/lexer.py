@@ -6,42 +6,41 @@ class Token:
         self.kind = kind
         self.value = value
         self.position = position
-        
-    def __str__(self, max_value_length=0):
+
+    def __repr__(self) -> str:
         return f"{self.position} {self.value} {self.kind}"
-        
 
-    # def __str__(self, max_value_length=0):
-    #     # Format the position of the token. If the position is unknown, display "Unknown Position".
-    #     position = (
-    #         f"({self.position[0]: >3} :{self.position[1]: >3}  )"  # Align the line and column numbers to the right
-    #         if self.position
-    #         else "(Unknown Position)"
-    #     )
+    def __str__(self, max_value_length=0):
+        # Format the position of the token. If the position is unknown, display "Unknown Position".
+        position = (
+            f"({self.position[0]: >3} :{self.position[1]: >3}  )"  # Align the line and column numbers to the right
+            if self.position
+            else "(Unknown Position)"
+        )
 
-    #     # Format the value of the token, ensuring it's right-padded with spaces for alignment.
-    #     # If the value is None (for tokens without a specific value), display an empty string.
-    #     value = (
-    #         f" {self.value}".ljust(max_value_length + 1)  # Right-pad the value
-    #         if self.value is not None
-    #         else ""
-    #     )
+        # Format the value of the token, ensuring it's right-padded with spaces for alignment.
+        # If the value is None (for tokens without a specific value), display an empty string.
+        value = (
+            f" {self.value}".ljust(max_value_length + 1)  # Right-pad the value
+            if self.value is not None
+            else ""
+        )
 
-    #     # Format the kind of the token.
-    #     # If the token kind is one of the special characters or 'end-of-text', set kind to an empty string.
-    #     # This ensures that kinds like ":" and "end-of-text" are not displayed twice.
-    #     kind = (
-    #         f" {self.kind}"  # Add a space before the kind for separation
-    #         if self.kind and self.kind not in {":", ",", ";", ".", "end-of-text"}
-    #         else ""
-    #     )
+        # Format the kind of the token.
+        # If the token kind is one of the special characters or 'end-of-text', set kind to an empty string.
+        # This ensures that kinds like ":" and "end-of-text" are not displayed twice.
+        kind = (
+            f" {self.kind}"  # Add a space before the kind for separation
+            if self.kind and self.kind not in {":", ",", ";", ".", "end-of-text"}
+            else ""
+        )
 
-    #     # If the kind is 'end-of-text', explicitly set kind to " end-of-text" to ensure it gets displayed.
-    #     if self.kind == "end-of-text":
-    #         kind = " end-of-text"
+        # If the kind is 'end-of-text', explicitly set kind to " end-of-text" to ensure it gets displayed.
+        if self.kind == "end-of-text":
+            kind = " end-of-text"
 
-    #     # Combine the formatted position, value, and kind into a single string and return it.
-    #     return f"{position} {value}{kind}"
+        # Combine the formatted position, value, and kind into a single string and return it.
+        return f"{position} {value}{kind}"
 
 
 class Lexer:

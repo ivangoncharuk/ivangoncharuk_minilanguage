@@ -18,11 +18,25 @@ class SyntaxAnalyzer:
             self.error(expected_token_kind)
 
     def error(self, expected_symbol):
-        position = self.current_token.position if self.current_token else "Unknown"
+        position = self.current_token.position if self.current_token else ("Unknown", "Unknown")
+        line_num, column_num = position
         print("\n--- NOT OK ---\n")
-        raise SyntaxError(
-            f"Error: Unexpected Token: '{self.current_token.kind}' at {position}. Expected: {expected_symbol}"
-        )
+        print(f"Syntax Error at Line {line_num}, Column {column_num}:")
+        print(f"Unexpected token: '{self.current_token.kind}'. Expected: {expected_symbol}")
+
+        if line_num != "Unknown":
+            lines = self.lexer.input_text.split('\n')
+            context_range = 2  # Number of lines to show before and after the error line
+            start = max(0, line_num - context_range - 1)
+            end = min(len(lines), line_num + context_range)
+
+            for i in range(start, end):
+                print(f"{i + 1}: {lines[i]}")
+                if i == line_num - 1:
+                    print(" " * (column_num + len(str(line_num)) + 2) + "^")
+
+        raise SyntaxError("Parsing failed due to syntax error.")
+
 
     def program(self):
         self.match("program")
