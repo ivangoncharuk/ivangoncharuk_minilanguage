@@ -1,4 +1,4 @@
-from src.lexer import Lexer, Token
+from src.lexer import Lexer
 from icecream import ic
 
 
@@ -9,8 +9,12 @@ class SyntaxAnalyzer:
         self.current_token = self.lexer.current_token
 
     def consume(self):
+        print("consuming...")
         self.lexer.next_token()
         self.current_token = self.lexer.current_token
+
+        print("after consumption:")
+        ic(self.current_token.value, self.current_token.kind)
 
     def match(self, expected_token_kind):
         if self.current_token and self.current_token.kind == expected_token_kind:
@@ -20,11 +24,9 @@ class SyntaxAnalyzer:
 
     def error(self, expected_symbol):
         position = self.current_token.position if self.current_token else "Unknown"
-        print(f"Error: Unexpected Token: '{self.current_token.kind}' at {position}")
-        print(
-            f"{position}: >>>>>> Bad Symbol '{self.current_token.kind}': expected '{expected_symbol}'"
+        raise SyntaxError(
+            f"Error: Unexpected Token: '{self.current_token.kind}' at {position}. Expected: {expected_symbol}"
         )
-        exit(1)
 
     def program(self):
         self.match("program")
@@ -32,6 +34,7 @@ class SyntaxAnalyzer:
         self.match(":")
         self.body()
         self.match(".")
+        print("Program successfully parsed without error")
 
     def body(self):
         if self.current_token.kind in {"bool", "int"}:
@@ -55,10 +58,15 @@ class SyntaxAnalyzer:
             self.error("'bool' or 'int'")
 
     def statements(self):
-        self.statement()
-        while self.current_token.kind == ";":
-            self.consume()
+        while self.current_token and self.current_token.kind in {
+            "ID",
+            "if",
+            "while",
+            "print",
+        }:
             self.statement()
+            if self.current_token.kind in {";", "end"}:
+                self.consume()
 
     def statement(self):
         if self.current_token.kind == "ID":
@@ -73,12 +81,9 @@ class SyntaxAnalyzer:
             self.error("ID, if, while, or print")
 
     def assignment(self):
-        if self.current_token.kind == "ID":
-            self.match("ID")
-            self.match(":=")
-            self.expression()
-        else:
-            self.error("ID")
+        self.match("ID")
+        self.match("ASSIGN_OP")
+        self.expression()
 
     def conditional(self):
         self.match("if")
@@ -102,26 +107,29 @@ class SyntaxAnalyzer:
         self.expression()
 
     def expression(self):
+        print("from expression")
+        ic(self.current_token.value, self.current_token.kind)
         self.simple_expression()
-        if self.current_token.kind in {"<", "=<", "=", "!=", ">=", ">"}:
-            self.match(self.current_token.kind)
-            self.simple_expression()
+        if self.current_token.kind == "RELATIONAL_OP":
+            self.match(self.current_token.kind)  # Consume the relational operator
+            self.simple_expression()  # Parse the right-hand side of the expression
 
     def simple_expression(self):
         self.term()
-        while self.current_token.kind in {"+", "-", "or"}:
+        while self.current_token.kind == "ADD_OP":
             self.consume()
             self.term()
 
     def term(self):
         self.factor()
-        while self.current_token.kind in {"*", "/", "mod", "and"}:
+        while self.current_token.kind == "MUL_OP":
             self.consume()
             self.factor()
 
     def factor(self):
-        if self.current_token.kind in {"-", "not"}:
+        if self.current_token.value in {"-", "not"}:
             self.consume()
+            self.factor()
         if self.current_token.kind in {"false", "true", "NUM"}:
             self.literal()
         elif self.current_token.kind == "ID":

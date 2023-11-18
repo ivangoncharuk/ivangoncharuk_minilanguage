@@ -1,5 +1,6 @@
-import os
+import os, sys
 
+sys.path.append(".")  # need this to run
 from src.lexer import Lexer
 
 
@@ -25,6 +26,22 @@ class TestLexer:
             ),
             5: ("Custom Example", ""),
             6: ("Test From File", ""),
+            7: (
+                "Modulo",
+                """program modulo:
+  int a, b, c;
+  bool eq;
+  a := 8;
+  b := 3;
+  c := a mod b;
+  eq := a / b + c = 4;
+  print a;
+  print b;
+  print c;
+  print a / b + c;
+  print eq
+.""",
+            ),
         }
 
     def run(self):
@@ -90,6 +107,7 @@ class TestLexer:
                 break
         # print("Tokens:")
         self.print_tokens(tokens)
+
 
 if __name__ == "__main__":
     tester = TestLexer()
