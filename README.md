@@ -3,6 +3,8 @@
 ## Overview
 This Python script is a syntax analyzer that tests various programs for correct or incorrect syntax based on a defined grammar. The script allows you to test files with predefined correct or incorrect syntax, or to specify a custom file for syntax analysis.
 
+- Supports full error handling!
+
 ## Requirements
 - Python 3.11.6
 
@@ -27,7 +29,7 @@ This Python script is a syntax analyzer that tests various programs for correct 
    ```sh
    python scripts/syntax_analyzer.py
    ```
-
+   
    or
 
    ```sh
@@ -47,6 +49,51 @@ This Python script is a syntax analyzer that tests various programs for correct 
 
 Follow the on-screen prompts to navigate through the options. Selecting an option for testing syntax will require you to choose a file from a provided list or enter a custom file path.
 
+## Error Handling
+  The analyzer supports full error handling. Here is what it might look like:
+
+```
+% python3 scripts/syntax_tester.py
+
+1. Test Correct Syntax
+2. Test Incorrect Syntax
+3. Enter a custom file path
+4. Toggle Screen Clearing (currently On)
+5. Toggle Printing File Content (currently On)
+0. Exit
+
+Enter your choice: 2
+
+1. ab1.txt
+...
+4. euclid-error.txt
+...
+10. print.txt
+
+Enter your choice (0 to go back): 4
+
+File Content: ... (will print file content if enabled.)
+
+Parsing Output:
+
+--- NOT OK ---
+
+Syntax Error at Line 11, Column 14:
+Unexpected token: 'RELATIONAL_OP'. Expected: Expected: 'true', 'false', 'NUM', 'ID', '('
+9:    b := 20;
+10:    print a;  print b;
+11:    while a !== b do
+                  ^
+12:       if a < b then b := b - a
+13:       else a := a - b
+Error in file 'grammar-examples/incorrect-syntax/euclid-error.txt': Parsing failed due to syntax error.
+
+Press Enter to continue...
+```
+
+
+
+
 
 # Lexical Analyzer
 This Python script serves as a lexical analyzer, taking a program written in a simplified programming language and breaking it down into tokens. Each token is associated with its type, value (if applicable), and position in the original text.
@@ -63,11 +110,11 @@ The Lexer class handles the tokenization of the input text.
 `position(self)`: Returns the position (line and character number) of the current token.
 
 ## How to Run
-Navigate to the directory containing the `main.py` script in your terminal or command prompt.
+Navigate to the directory containing the `lexer_tester.py` script in your terminal or command prompt.
 
 Run the script using the following command:
 
-> `python3 src/main.py`
+> `python3 scripts/lexer_tester.py`
 
 Follow the on-screen prompts to choose an example to test, or input your own code.
 
@@ -328,9 +375,3 @@ print "Final value of result: "; ,!,***;
 SyntaxError: Unexpected symbol '!' at position (1, 35)
 ```
 
-Furthermore, removing the symbol '!' will result in yet another SyntaxError due to the illegal token '***'
-
-
-
-Author
-Ivan Goncharuk
