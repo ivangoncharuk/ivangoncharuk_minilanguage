@@ -1,5 +1,4 @@
 from src.lexer import Lexer
-from icecream import ic
 
 
 class SyntaxAnalyzer:

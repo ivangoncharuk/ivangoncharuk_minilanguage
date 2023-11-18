@@ -1,3 +1,53 @@
+# Syntax Analyzer
+
+## Overview
+This Python script is a syntax analyzer that tests various programs for correct or incorrect syntax based on a defined grammar. The script allows you to test files with predefined correct or incorrect syntax, or to specify a custom file for syntax analysis.
+
+## Requirements
+- Python 3.11.6
+
+## Running the Script
+
+1. **Clone or Download the Repository**
+   
+   Ensure you have the project repository on your local machine. If not, clone or download it from its source.
+
+2. **Navigate to the Project Directory**
+   
+   Open a terminal or command prompt and navigate to the root directory of the project.
+
+   ```sh
+   cd path/to/project
+   ```
+
+3. **Running the Syntax Analyzer**
+
+   From the root directory of the project, execute the syntax analyzer script using Python. Depending on your system's configuration, you may use either `python` or `python3` as the command.
+
+   ```sh
+   python scripts/syntax_analyzer.py
+   ```
+
+   or
+
+   ```sh
+   python3 scripts/syntax_analyzer.py
+   ```
+
+   This will start the script and present you with a menu of options to test various syntax files.
+
+## Script Options
+
+- **Test Correct Syntax**: Test files with syntax that is expected to be correct.
+- **Test Incorrect Syntax**: Test files with syntax that is expected to be incorrect.
+- **Enter a Custom File Path**: Test a specific file by entering its file path.
+- **Toggle Screen Clearing**: Enable or disable the clearing of the screen after each action.
+- **Toggle Printing File Content**: Enable or disable the printing of a file's content before parsing it.
+- **Exit**: Exit the script.
+
+Follow the on-screen prompts to navigate through the options. Selecting an option for testing syntax will require you to choose a file from a provided list or enter a custom file path.
+
+
 # Lexical Analyzer
 This Python script serves as a lexical analyzer, taking a program written in a simplified programming language and breaking it down into tokens. Each token is associated with its type, value (if applicable), and position in the original text.
 
