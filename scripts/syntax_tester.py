@@ -1,5 +1,6 @@
 import os, sys
 import glob
+import subprocess
 
 sys.path.append(".")  # need this to run
 from src.lexer import Lexer
@@ -31,8 +32,16 @@ def list_files_and_get_choice(files):
     return choice
 
 
+def clear_screen():
+    if os.name == "nt":  # for Windows
+        subprocess.call("cls", shell=True)
+    else:  # for MacOS and Linux
+        subprocess.call("clear", shell=True)
+
+
 def main():
     while True:
+        clear_screen()
         print("\n1. Test Correct Syntax")
         print("2. Test Incorrect Syntax")
         print("3. Enter a custom file path")
@@ -59,6 +68,7 @@ def main():
             test_file(custom_path)
 
         elif choice == 0:
+            clear_screen()
             print("Exiting.")
             break
 
