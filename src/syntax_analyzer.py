@@ -9,14 +9,13 @@ class SyntaxAnalyzer:
         self.current_token = self.lexer.current_token
 
     def consume(self):
-        print("consuming...")
         self.lexer.next_token()
         self.current_token = self.lexer.current_token
 
-        print("after consumption:")
-        ic(self.current_token.value, self.current_token.kind)
-
     def match(self, expected_token_kind):
+        print("matching...")
+        ic(expected_token_kind)
+        ic(self.current_token.value, self.current_token.kind)
         if self.current_token and self.current_token.kind == expected_token_kind:
             self.consume()
         else:
@@ -65,7 +64,7 @@ class SyntaxAnalyzer:
             "print",
         }:
             self.statement()
-            if self.current_token.kind in {";", "end"}:
+            if self.current_token.kind in {";"}:
                 self.consume()
 
     def statement(self):
@@ -107,10 +106,13 @@ class SyntaxAnalyzer:
         self.expression()
 
     def expression(self):
-        print("from expression")
-        ic(self.current_token.value, self.current_token.kind)
         self.simple_expression()
-        if self.current_token.kind == "RELATIONAL_OP":
+        if self.current_token.kind in {
+            "RELATIONAL_OP",
+            "and",
+            "or",
+            "not",
+        }:
             self.match(self.current_token.kind)  # Consume the relational operator
             self.simple_expression()  # Parse the right-hand side of the expression
 
@@ -127,19 +129,20 @@ class SyntaxAnalyzer:
             self.factor()
 
     def factor(self):
-        if self.current_token.value in {"-", "not"}:
+        if self.current_token.kind == "not" or self.current_token.value == "-":
             self.consume()
             self.factor()
-        if self.current_token.kind in {"false", "true", "NUM"}:
-            self.literal()
-        elif self.current_token.kind == "ID":
-            self.consume()
-        elif self.current_token.kind == "(":
-            self.consume()
-            self.expression()
-            self.match(")")
         else:
-            self.error("Expected: 'true', 'false', 'NUM', 'ID', '('")
+            if self.current_token.kind in {"false", "true", "NUM"}:
+                self.literal()
+            elif self.current_token.kind == "ID":
+                self.consume()
+            elif self.current_token.kind == "(":
+                self.consume()
+                self.expression()
+                self.match(")")
+            else:
+                self.error("Expected: 'true', 'false', 'NUM', 'ID', '('")
 
     def literal(self):
         if self.current_token.kind == "NUM":

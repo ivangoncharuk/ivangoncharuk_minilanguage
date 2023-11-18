@@ -60,24 +60,14 @@ class TestSyntaxAnalyzer(unittest.TestCase):
         except Exception as e:
             self.fail(f"Expression parsing failed with exception: {e}")
 
-    def test_program_print(self):
-        lexer = Lexer("program Print: print(77).")
-        analyzer = SyntaxAnalyzer(lexer)
-        try:
-            analyzer.program()
-        except Exception as e:
-            self.fail(
-                f"Complete syntax analysis with correct code failed with exception: {e}"
-            )
-            
     def test_unary_operator_simple_expression(self):
-        lexer = Lexer("-10")
+        lexer = Lexer("not 10")
         analyzer = SyntaxAnalyzer(lexer)
         try:
             analyzer.expression()
         except Exception as e:
             self.fail(f"Unary operator in simple expression failed: {e}")
-            
+
     def test_unary_operator_with_identifier(self):
         lexer = Lexer("not x")
         analyzer = SyntaxAnalyzer(lexer)
@@ -85,7 +75,7 @@ class TestSyntaxAnalyzer(unittest.TestCase):
             analyzer.expression()
         except Exception as e:
             self.fail(f"Unary operator with identifier failed: {e}")
-    
+
     def test_unary_operator_complex_expression(self):
         lexer = Lexer("not (x > 5)")
         analyzer = SyntaxAnalyzer(lexer)
@@ -93,7 +83,7 @@ class TestSyntaxAnalyzer(unittest.TestCase):
             analyzer.expression()
         except Exception as e:
             self.fail(f"Unary operator in complex expression failed: {e}")
-            
+
     def test_nested_unary_operators(self):
         lexer = Lexer("not not true")
         analyzer = SyntaxAnalyzer(lexer)
@@ -101,7 +91,7 @@ class TestSyntaxAnalyzer(unittest.TestCase):
             analyzer.expression()
         except Exception as e:
             self.fail(f"Nested unary operators failed: {e}")
-            
+
     def test_unary_operator_in_conditional(self):
         lexer = Lexer("if not x then y := 0; else y := 1; end;")
         analyzer = SyntaxAnalyzer(lexer)
@@ -117,6 +107,368 @@ class TestSyntaxAnalyzer(unittest.TestCase):
             analyzer.expression()
         except Exception as e:
             self.fail(f"Complex expression with multiple operators failed: {e}")
+
+    def test_iterative_statement_parsing(self):
+        lexer = Lexer("while x < 10 do x := x + 1; end;")
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.statements()
+        except Exception as e:
+            self.fail(f"Iterative statement parsing failed with exception: {e}")
+
+    def test_nested_statements(self):
+        lexer = Lexer(
+            "if x != 0 then while y < x do y := y + 1; end; else print x; end;"
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.statements()
+        except Exception as e:
+            self.fail(f"Nested statements parsing failed: {e}")
+
+    def test_mixed_operator_expression(self):
+        lexer = Lexer("x + y * z - w / v")
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.expression()
+        except Exception as e:
+            self.fail(f"Mixed operator expression parsing failed: {e}")
+
+    def test_assignment_with_complex_expression(self):
+        lexer = Lexer("a := b * (c + d) / e - f")
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.statements()
+        except Exception as e:
+            self.fail(f"Assignment with complex expression failed: {e}")
+
+    def test_expression_with_parentheses(self):
+        lexer = Lexer("(a + b) * (c - d)")
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.expression()
+        except Exception as e:
+            self.fail(f"Expression with parentheses parsing failed: {e}")
+
+    def test_boolean_literal_handling(self):
+        lexer = Lexer("true and false or not true")
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.expression()
+        except Exception as e:
+            self.fail(f"Boolean literal handling failed: {e}")
+
+    def test_full_program_parsing(self):
+        program_code = """
+        program Example:
+            int i, j;
+            i := 0;
+            j := 10;
+            while i < j do
+                print i;
+                i := i + 1;
+            end;
+        ."""
+        lexer = Lexer(program_code)
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(f"Full program parsing failed with exception: {e}")
+
+    def test_complex_conditional_statement(self):
+        lexer = Lexer(
+            "if x < y and y > z then print x; elif y <= z then print y; else print z; end;"
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.statements()
+        except Exception as e:
+            self.fail(f"Complex conditional statement parsing failed: {e}")
+
+    def test_program_print(self):
+        lexer = Lexer("program Print: print(77).")
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_modulo(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program mudulo:
+  int a, b, c;
+  bool eq;
+  a := 8;
+  b := 3;
+  c := a mod b;
+  eq := a / b + c = 4;
+  print a;
+  print b;
+  print c;
+  print a / b + c;
+  print eq
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_hiding(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program Hiding :
+   int a;
+   int b;
+   a := 2;
+   b := 5;
+   while not (a != b) do
+     int b;
+     b := 2 * a;
+     print b;
+     a := a + 1
+   end;
+   print b
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_euclid(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """// Euclid's algorithm for the greatest common divisor.
+program GCD:
+   int a;  int b;
+   a := 15;
+   b := 20;
+   print a;  print b;
+   while a != b do
+      if a < b then b := b - a
+      else a := a - b
+      end
+   end;
+   print a
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_scoping(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """
+program bad_scoping:
+   int a;
+   while a = 0 do
+     int b;
+     b := a
+   end;
+   if a = 0 then
+      int c;
+      c := b
+   else
+      a := c
+   end
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_7(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   int b;
+   if a < b then
+     bool b;
+     b := 2 * a
+   end
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_6(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   int b;
+   a := 2;
+   b := 5;
+   while not a = b do
+     bool b;
+     b := 2 * a
+   end
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_5(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   bool b;
+   while not a = b do
+     int b;
+     print b
+   end
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_4(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   bool b;
+   b := a + b
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_3(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   bool b;
+   b := not a and b
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_2(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   bool b;
+   bool c;
+   a := b and c
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_expression_1(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_expression:
+   int a;
+   bool b;
+   b := a and b
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
+
+    def test_program_bad_declaration(self):
+        # for some reason my lexer is seeing 'mod' inside the id 'modulo' and treating
+        # it as a 'MUL_OP' operator...weird
+        lexer = Lexer(
+            """program bad_declaration:
+   int a;
+   int b;
+   bool a;
+   a := a
+.
+"""
+        )
+        analyzer = SyntaxAnalyzer(lexer)
+        try:
+            analyzer.program()
+        except Exception as e:
+            self.fail(
+                f"Complete syntax analysis with correct code failed with exception: {e}"
+            )
 
 
 if __name__ == "__main__":

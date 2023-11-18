@@ -16,9 +16,22 @@ def test_lexer_integration():
     # with open(file_name, "r") as f:
     #     file_content = f.read()
 
-    lexer = Lexer("-10")
+    lexer = Lexer("""// This program should print the number 20.
+program Twenty:
+  int a;
+  int b;
+  a := 2;
+  b := 1;
+  while a >= 0 do
+    int b;
+    b := - 2;     // (the inner b, the outer one is still 1)
+    a := a * b    // a = -4
+  end;
+  print a * (a - b)    // -4 * (-4 - 1)  =  -4 * (-5)  =  20
+.
+""")
     analyzer = SyntaxAnalyzer(lexer)
-    analyzer.expression()
+    analyzer.program()
 
     # try:
     #     analyzer.statements()
