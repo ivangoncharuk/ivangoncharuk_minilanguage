@@ -13,9 +13,6 @@ class SyntaxAnalyzer:
         self.current_token = self.lexer.current_token
 
     def match(self, expected_token_kind):
-        print("matching...")
-        ic(expected_token_kind)
-        ic(self.current_token.value, self.current_token.kind)
         if self.current_token and self.current_token.kind == expected_token_kind:
             self.consume()
         else:
@@ -23,6 +20,7 @@ class SyntaxAnalyzer:
 
     def error(self, expected_symbol):
         position = self.current_token.position if self.current_token else "Unknown"
+        print("\n--- NOT OK ---\n")
         raise SyntaxError(
             f"Error: Unexpected Token: '{self.current_token.kind}' at {position}. Expected: {expected_symbol}"
         )
@@ -33,7 +31,7 @@ class SyntaxAnalyzer:
         self.match(":")
         self.body()
         self.match(".")
-        print("Program successfully parsed without error")
+        print("\n--- OK ---\n")
 
     def body(self):
         if self.current_token.kind in {"bool", "int"}:
